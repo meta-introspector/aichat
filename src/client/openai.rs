@@ -39,7 +39,7 @@ impl_client_trait!(
     (noop_prepare_rerank, noop_rerank),
 );
 
-fn prepare_chat_completions(
+async fn prepare_chat_completions(
     self_: &OpenAIClient,
     data: ChatCompletionsData,
 ) -> Result<RequestData> {
@@ -62,7 +62,7 @@ fn prepare_chat_completions(
     Ok(request_data)
 }
 
-fn prepare_embeddings(self_: &OpenAIClient, data: &EmbeddingsData) -> Result<RequestData> {
+async fn prepare_embeddings(self_: &OpenAIClient, data: &EmbeddingsData) -> Result<RequestData> {
     let api_key = self_.get_api_key()?;
     let api_base = self_
         .get_api_base()

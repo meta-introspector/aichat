@@ -1,0 +1,1 @@
+cargo run -- auth login > oauth_output.txt 2>&1 &

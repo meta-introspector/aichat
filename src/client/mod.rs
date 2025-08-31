@@ -11,6 +11,7 @@ pub use common::*;
 pub use message::*;
 pub use model::*;
 pub use stream::*;
+use crate::auth::Authenticator;
 
 register_client!(
     (openai, "openai", OpenAIConfig, OpenAIClient),

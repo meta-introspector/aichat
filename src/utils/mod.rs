@@ -10,7 +10,7 @@ mod render_prompt;
 mod request;
 mod spinner;
 mod variables;
-mod oauth;
+
 
 pub use self::abort_signal::*;
 

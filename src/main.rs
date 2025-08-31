@@ -24,7 +24,9 @@ use crate::config::{
 use crate::render::render_error;
 use crate::repl::Repl;
 use crate::utils::*;
-use crate::auth::{Authenticator, ApiKeyAuthenticator, OAuthAuthenticator, OAuthConfig};
+use crate::auth::{Authenticator, ApiKeyAuthenticator};
+use crate::auth::oauth_split::oauth_authenticator_struct::OAuthAuthenticator;
+use crate::auth::oauth_split::oauth_config::OAuthConfig;
 use crate::auth::credential_store::CredentialStore;
 
 use anyhow::{bail, Result};
@@ -57,23 +59,39 @@ async fn main() -> Result<()> {
     setup_logger(working_mode.is_serve())?;
     let config = Arc::new(RwLock::new(Config::init(working_mode, info_flag).await?));
 
-    // Temporary OAuth test block
-    let oauth_config = OAuthConfig {
-        client_id: "yourkidding".to_string(),
-        client_secret: "neverever".to_string(),
-    };
-    let credential_store = Arc::new(CredentialStore::new()?);
-    let oauth_authenticator = OAuthAuthenticator::new(oauth_config, credential_store);
-
-    match oauth_authenticator.authenticate().await {
-        Ok(token) => println!("OAuth Access Token: {}", token),
-        Err(e) => eprintln!("OAuth Error: {}", e),
+    if let Some(command) = cli.command {
+        match command {
+            cli::Commands::Auth(auth_command) => {
+                handle_auth_command(auth_command).await?;
+            }
+        }
+        return Ok(());
     }
-    // End temporary OAuth test block
 
     if let Err(err) = run(config, cli, text).await {
         render_error(err);
         std::process::exit(1);
+    }
+    Ok(())
+}
+
+async fn handle_auth_command(command: cli::AuthCommands) -> Result<()> {
+    match command {
+        cli::AuthCommands::Login => {
+            // TODO: Load client_id and client_secret securely, e.g., from environment variables or a config file.
+            // For now, using placeholders. REPLACE THESE WITH YOUR ACTUAL CREDENTIALS.
+            let oauth_config = OAuthConfig {
+                client_id: "YOUR_CLIENT_ID".to_string(),
+                client_secret: "YOUR_CLIENT_SECRET".to_string(),
+            };
+            let credential_store = Arc::new(CredentialStore::new()?);
+            let oauth_authenticator = OAuthAuthenticator::new(oauth_config, credential_store);
+
+            match oauth_authenticator.authenticate().await {
+                Ok(token) => println!("OAuth Access Token: {}", token),
+                Err(e) => eprintln!("OAuth Error: {}", e),
+            }
+        }
     }
     Ok(())
 }

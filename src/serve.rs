@@ -300,7 +300,7 @@ impl Server {
             config.write().set_model(&model_name)?;
         }
 
-        let mut client = init_client(&config, None)?;
+        let mut client = init_client(&config, None, None)?;
         if max_tokens.is_some() {
             client.model_mut().set_max_tokens(max_tokens, true);
         }
@@ -490,7 +490,7 @@ impl Server {
             EmbeddingsReqBodyInput::Single(v) => vec![v],
             EmbeddingsReqBodyInput::Multiple(v) => v,
         };
-        let client = init_client(&config, Some(embedding_model))?;
+        let client = init_client(&config, Some(embedding_model), None)?;
         let data = client
             .embeddings(&EmbeddingsData {
                 query: false,
@@ -546,7 +546,7 @@ impl Server {
         let reranker_model =
             Model::retrieve_model(&config.read(), &reranker_model_id, ModelType::Reranker)?;
 
-        let client = init_client(&config, Some(reranker_model))?;
+        let client = init_client(&config, Some(reranker_model), None)?;
         let data = client
             .rerank(&RerankData {
                 query,

@@ -85,7 +85,8 @@ impl Input {
                     last_reply = Some(v.clone());
                 }
                 if let Some(v) = last_reply.clone() {
-                    texts.push(format!("\n{v}"));
+                    texts.push(format!("
+{v}"));
                 }
             }
             if last_reply.is_none() && documents.is_empty() && medias.is_empty() {
@@ -95,17 +96,21 @@ impl Input {
         let documents_len = documents.len();
         for (kind, path, contents) in documents {
             if documents_len == 1 && raw_text.is_empty() {
-                texts.push(format!("\n{contents}"));
+                texts.push(format!("
+{contents}"));
             } else {
                 texts.push(format!(
-                    "\n============ {kind}: {path} ============\n{contents}"
+                    "
+============ {kind}: {path} ============
+{contents}"
                 ));
             }
         }
         let (role, with_session, with_agent) = resolve_role(&config.read(), role);
         Ok(Self {
             config: config.clone(),
-            text: texts.join("\n"),
+            text: texts.join("
+"),
             raw: (raw_text.to_string(), raw_paths),
             patched_text: None,
             last_reply,
@@ -143,7 +148,6 @@ impl Input {
     pub fn data_urls(&self) -> HashMap<String, String> {
         self.data_urls.clone()
     }
-
     pub fn tool_calls(&self) -> &Option<MessageContentToolCalls> {
         &self.tool_calls
     }
@@ -219,12 +223,13 @@ impl Input {
         self
     }
 
-    pub fn create_client(&self) -> Result<Box<dyn Client>> {
-        init_client(&self.config, Some(self.role().model().clone()))
+    pub async fn create_client(&self) -> Result<Box<dyn Client>> {
+        let authenticator = self.config.read().get_authenticator().await?;
+        init_client(&self.config, Some(self.role().model().clone()), authenticator)
     }
 
     pub async fn fetch_chat_text(&self) -> Result<String> {
-        let client = self.create_client()?;
+        let client = self.create_client().await?;
         let text = client.chat_completions(self.clone()).await?.text;
         let text = strip_think_tag(&text).to_string();
         Ok(text)
@@ -271,7 +276,6 @@ impl Input {
             self.role().echo_messages(self)
         }
     }
-
     pub fn role(&self) -> &Role {
         &self.role
     }
@@ -302,6 +306,7 @@ impl Input {
             .trim()
             .chars()
             .map(|c| if c.is_control() { ' ' } else { c })
+
             .collect();
         if text.width_cjk() > SUMMARY_MAX_WIDTH {
             let mut sum_width = 0;

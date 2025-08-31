@@ -20,6 +20,7 @@ use crate::render::{MarkdownRender, RenderOptions};
 use crate::repl::{run_repl_command, split_args_text};
 use crate::utils::*;
 
+use crate::auth::Authenticator;
 use anyhow::{anyhow, bail, Context, Result};
 use indexmap::IndexMap;
 use inquire::{list_option::ListOption, validator::Validation, Confirm, MultiSelect, Select, Text};

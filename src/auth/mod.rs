@@ -1,8 +1,13 @@
+use async_trait::async_trait;
 pub mod credential_store;
-pub mod oauth;
+pub mod oauth_split;
 
-pub trait Authenticator {
-    fn authenticate(&self) -> anyhow::Result<String>; // Returns an access token
+pub use oauth_split::oauth_authenticator_struct::OAuthAuthenticator;
+pub use oauth_split::oauth_config::OAuthConfig;
+
+#[async_trait]
+pub trait Authenticator: Send + Sync {
+    async fn authenticate(&self) -> anyhow::Result<String>; // Returns an access token
 }
 
 pub struct ApiKeyAuthenticator {
@@ -15,8 +20,9 @@ impl ApiKeyAuthenticator {
     }
 }
 
+#[async_trait]
 impl Authenticator for ApiKeyAuthenticator {
-    fn authenticate(&self) -> anyhow::Result<String> {
+    async fn authenticate(&self) -> anyhow::Result<String> {
         Ok(self.api_key.clone())
     }
 }

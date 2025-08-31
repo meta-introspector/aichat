@@ -1,5 +1,5 @@
 use anyhow::{Context, Result};
-use clap::Parser;
+use clap::{Args, Parser};
 use is_terminal::IsTerminal;
 use std::io::{stdin, Read};
 
@@ -86,6 +86,24 @@ pub struct Cli {
     /// Input text
     #[clap(trailing_var_arg = true)]
     text: Vec<String>,
+}
+
+#[derive(Parser, Debug)]
+pub enum Commands {
+    /// Authentication related commands
+    Auth(AuthCommands),
+}
+
+#[derive(Debug, Args)]
+pub struct AuthCommands {
+    #[clap(subcommand)]
+    pub command: AuthSubcommands,
+}
+
+#[derive(Parser, Debug)]
+pub enum AuthSubcommands {
+    /// Login with OAuth
+    Login,
 }
 
 impl Cli {

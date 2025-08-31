@@ -38,7 +38,7 @@ impl_client_trait!(
     (prepare_rerank, generic_rerank),
 );
 
-fn prepare_chat_completions(
+async fn prepare_chat_completions(
     self_: &CohereClient,
     data: ChatCompletionsData,
 ) -> Result<RequestData> {
@@ -62,7 +62,7 @@ fn prepare_chat_completions(
     Ok(request_data)
 }
 
-fn prepare_embeddings(self_: &CohereClient, data: &EmbeddingsData) -> Result<RequestData> {
+async fn prepare_embeddings(self_: &CohereClient, data: &EmbeddingsData) -> Result<RequestData> {
     let api_key = self_.get_api_key()?;
     let api_base = self_
         .get_api_base()

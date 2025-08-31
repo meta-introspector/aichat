@@ -38,7 +38,7 @@ impl_client_trait!(
     (noop_prepare_rerank, noop_rerank),
 );
 
-fn prepare_chat_completions(
+async fn prepare_chat_completions(
     self_: &ClaudeClient,
     data: ChatCompletionsData,
 ) -> Result<RequestData> {

@@ -7,6 +7,8 @@ use std::path::{Path, PathBuf};
 const GEMINI_DIR: &str = ".gemini";
 const CREDENTIAL_FILENAME: &str = "oauth_creds.json";
 
+use super::oauth_split::user_info::UserInfo;
+
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Credentials {
     // These fields should match the structure of oauth_creds.json
@@ -14,6 +16,7 @@ pub struct Credentials {
     pub refresh_token: Option<String>,
     pub token_type: Option<String>,
     pub expiry_date: Option<i64>,
+    pub user_info: Option<UserInfo>,
 }
 
 pub struct CredentialStore {
