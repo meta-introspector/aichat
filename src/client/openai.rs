@@ -24,23 +24,11 @@ pub struct OpenAIConfig {
 impl OpenAIClient {
     config_get_fn!(api_key, get_api_key);
     config_get_fn!(api_base, get_api_base);
-
-    pub const PROMPTS: [PromptAction<'static>; 1] = [("api_key", "API Key", None)];
 }
 
-impl_client_trait!(
-    OpenAIClient,
-    (
-        prepare_chat_completions,
-        openai_chat_completions,
-        openai_chat_completions_streaming
-    ),
-    (prepare_embeddings, openai_embeddings),
-    (noop_prepare_rerank, noop_rerank),
-);
 
-fn prepare_chat_completions(
-    self_: &OpenAIClient,
+pub async fn prepare_chat_completions(
+    self_: &crate::client::OpenAIClient,
     data: ChatCompletionsData,
 ) -> Result<RequestData> {
     let api_key = self_.get_api_key()?;
@@ -62,7 +50,7 @@ fn prepare_chat_completions(
     Ok(request_data)
 }
 
-fn prepare_embeddings(self_: &OpenAIClient, data: &EmbeddingsData) -> Result<RequestData> {
+pub async fn prepare_embeddings(self_: &crate::client::OpenAIClient, data: &EmbeddingsData) -> Result<RequestData> {
     let api_key = self_.get_api_key()?;
     let api_base = self_
         .get_api_base()
@@ -114,7 +102,7 @@ pub async fn openai_chat_completions_streaming(
                     function_arguments = String::from("{}");
                 }
                 let arguments: Value = function_arguments.parse().with_context(|| {
-                    format!("Tool call '{function_name}' have non-JSON arguments '{function_arguments}'")
+                    format!("Tool call '{{function_name}}' have non-JSON arguments '{{function_arguments}}'")
                 })?;
                 handler.tool_call(ToolCall::new(
                     function_name.clone(),
@@ -164,7 +152,7 @@ pub async fn openai_chat_completions_streaming(
                         function_arguments = String::from("{}");
                     }
                     let arguments: Value = function_arguments.parse().with_context(|| {
-                        format!("Tool call '{function_name}' have non-JSON arguments '{function_arguments}'")
+                        format!("Tool call '{{function_name}}' have non-JSON arguments '{{function_arguments}}'")
                     })?;
                     handler.tool_call(ToolCall::new(
                         function_name.clone(),
@@ -296,8 +284,8 @@ pub fn openai_build_chat_completions_body(data: ChatCompletionsData, model: &Mod
                     }
                 }
                 MessageContent::Text(text) if role.is_assistant() && i != messages_len - 1 => {
-                    vec![json!({ "role": role, "content": strip_think_tag(&text) }
-                    )]
+                    vec![json!({ "role": role, "content": strip_think_tag(&text) })
+                    ]
                 }
                 _ => vec![json!({ "role": role, "content": content })],
             }
@@ -370,7 +358,7 @@ pub fn openai_extract_chat_completions(data: &Value) -> Result<ChatCompletionsOu
                 call["id"].as_str(),
             ) {
                 let arguments: Value = arguments.parse().with_context(|| {
-                    format!("Tool call '{name}' have non-JSON arguments '{arguments}'")
+                    format!("Tool call '{{name}}' have non-JSON arguments '{{arguments}}'")
                 })?;
                 tool_calls.push(ToolCall::new(
                     name.to_string(),
@@ -385,7 +373,7 @@ pub fn openai_extract_chat_completions(data: &Value) -> Result<ChatCompletionsOu
         bail!("Invalid response data: {data}");
     }
     let text = if !reasoning.is_empty() {
-        format!("<think>\n{reasoning}\n</think>\n\n{text}")
+        format!("<think>\n{{reasoning}}\n</think>\n\n{{text}}")
     } else {
         text.to_string()
     };

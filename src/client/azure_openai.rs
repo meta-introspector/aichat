@@ -18,30 +18,11 @@ pub struct AzureOpenAIConfig {
 impl AzureOpenAIClient {
     config_get_fn!(api_base, get_api_base);
     config_get_fn!(api_key, get_api_key);
-
-    pub const PROMPTS: [PromptAction<'static>; 2] = [
-        (
-            "api_base",
-            "API Base",
-            Some("e.g. https://{RESOURCE}.openai.azure.com"),
-        ),
-        ("api_key", "API Key", None),
-    ];
 }
 
-impl_client_trait!(
-    AzureOpenAIClient,
-    (
-        prepare_chat_completions,
-        openai_chat_completions,
-        openai_chat_completions_streaming
-    ),
-    (prepare_embeddings, openai_embeddings),
-    (noop_prepare_rerank, noop_rerank),
-);
 
-fn prepare_chat_completions(
-    self_: &AzureOpenAIClient,
+pub async fn prepare_chat_completions(
+    self_: &crate::client::AzureOpenAIClient,
     data: ChatCompletionsData,
 ) -> Result<RequestData> {
     let api_base = self_.get_api_base()?;
@@ -62,7 +43,10 @@ fn prepare_chat_completions(
     Ok(request_data)
 }
 
-fn prepare_embeddings(self_: &AzureOpenAIClient, data: &EmbeddingsData) -> Result<RequestData> {
+pub async fn prepare_embeddings(
+    self_: &crate::client::AzureOpenAIClient,
+    data: &EmbeddingsData,
+) -> Result<RequestData> {
     let api_base = self_.get_api_base()?;
     let api_key = self_.get_api_key()?;
 

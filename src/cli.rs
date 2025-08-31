@@ -1,11 +1,13 @@
 use anyhow::{Context, Result};
-use clap::Parser;
+use clap::{Args, Parser};
 use is_terminal::IsTerminal;
 use std::io::{stdin, Read};
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 pub struct Cli {
+    #[clap(subcommand)]
+    pub command: Option<Commands>,
     /// Select a LLM model
     #[clap(short, long)]
     pub model: Option<String>,
@@ -84,6 +86,24 @@ pub struct Cli {
     /// Input text
     #[clap(trailing_var_arg = true)]
     text: Vec<String>,
+}
+
+#[derive(Parser, Debug)]
+pub enum Commands {
+    /// Authentication related commands
+    Auth(AuthCommands),
+}
+
+#[derive(Debug, Args)]
+pub struct AuthCommands {
+    #[clap(subcommand)]
+    pub command: AuthSubcommands,
+}
+
+#[derive(Parser, Debug)]
+pub enum AuthSubcommands {
+    /// Login with OAuth
+    Login,
 }
 
 impl Cli {

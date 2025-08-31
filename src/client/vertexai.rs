@@ -90,7 +90,7 @@ impl Client for VertexAIClient {
 }
 
 fn prepare_chat_completions(
-    self_: &VertexAIClient,
+    self_: &crate::client::VertexAIClient,
     data: ChatCompletionsData,
     model_category: &ModelCategory,
 ) -> Result<RequestData> {
@@ -152,7 +152,7 @@ fn prepare_chat_completions(
     Ok(request_data)
 }
 
-fn prepare_embeddings(self_: &VertexAIClient, data: &EmbeddingsData) -> Result<RequestData> {
+fn prepare_embeddings(self_: &crate::client::VertexAIClient, data: &EmbeddingsData) -> Result<RequestData> {
     let project_id = self_.get_project_id()?;
     let location = self_.get_location()?;
     let access_token = get_access_token(self_.name())?;

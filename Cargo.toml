@@ -68,9 +68,11 @@ which = "8.0.0"
 fuzzy-matcher = "0.3.7"
 terminal-colorsaurus = "0.4.8"
 duct = "1.0.0"
+oauth2 = { version = "5.0.0", features = ["reqwest"], default-features = false }
+open = "5.0"
 
 [dependencies.reqwest]
-version = "0.12.0"
+version = "0.12.12"
 features = ["json", "multipart", "socks", "rustls-tls", "rustls-tls-native-roots"]
 default-features = false
 
@@ -91,6 +93,10 @@ arboard = { version = "3.3.0", default-features = false }
 [dev-dependencies]
 pretty_assertions = "1.4.0"
 rand = "0.9.0"
+predicates = "3.1.0"
+assert_cmd = "2.0.14"
+tempfile = "3.10.1"
+aichat = { path = "." }
 
 [profile.release]
 lto = true

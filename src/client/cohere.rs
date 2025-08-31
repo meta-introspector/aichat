@@ -23,23 +23,11 @@ pub struct CohereConfig {
 impl CohereClient {
     config_get_fn!(api_key, get_api_key);
     config_get_fn!(api_base, get_api_base);
-
-    pub const PROMPTS: [PromptAction<'static>; 1] = [("api_key", "API Key", None)];
 }
 
-impl_client_trait!(
-    CohereClient,
-    (
-        prepare_chat_completions,
-        chat_completions,
-        chat_completions_streaming
-    ),
-    (prepare_embeddings, embeddings),
-    (prepare_rerank, generic_rerank),
-);
 
-fn prepare_chat_completions(
-    self_: &CohereClient,
+pub async fn prepare_chat_completions(
+    self_: &crate::client::CohereClient,
     data: ChatCompletionsData,
 ) -> Result<RequestData> {
     let api_key = self_.get_api_key()?;
@@ -62,7 +50,10 @@ fn prepare_chat_completions(
     Ok(request_data)
 }
 
-fn prepare_embeddings(self_: &CohereClient, data: &EmbeddingsData) -> Result<RequestData> {
+pub async fn prepare_embeddings(
+    self_: &crate::client::CohereClient,
+    data: &EmbeddingsData,
+) -> Result<RequestData> {
     let api_key = self_.get_api_key()?;
     let api_base = self_
         .get_api_base()
@@ -89,7 +80,7 @@ fn prepare_embeddings(self_: &CohereClient, data: &EmbeddingsData) -> Result<Req
     Ok(request_data)
 }
 
-fn prepare_rerank(self_: &CohereClient, data: &RerankData) -> Result<RequestData> {
+pub fn prepare_rerank(self_: &CohereClient, data: &RerankData) -> Result<RequestData> {
     let api_key = self_.get_api_key()?;
     let api_base = self_
         .get_api_base()
@@ -105,7 +96,7 @@ fn prepare_rerank(self_: &CohereClient, data: &RerankData) -> Result<RequestData
     Ok(request_data)
 }
 
-async fn chat_completions(
+pub async fn chat_completions(
     builder: RequestBuilder,
     _model: &Model,
 ) -> Result<ChatCompletionsOutput> {
@@ -120,7 +111,7 @@ async fn chat_completions(
     extract_chat_completions(&data)
 }
 
-async fn chat_completions_streaming(
+pub async fn chat_completions_streaming(
     builder: RequestBuilder,
     handler: &mut SseHandler,
     _model: &Model,
@@ -188,7 +179,7 @@ async fn chat_completions_streaming(
     sse_stream(builder, handle).await
 }
 
-async fn embeddings(builder: RequestBuilder, _model: &Model) -> Result<EmbeddingsOutput> {
+pub async fn embeddings(builder: RequestBuilder, _model: &Model) -> Result<EmbeddingsOutput> {
     let res = builder.send().await?;
     let status = res.status();
     let data: Value = res.json().await?;

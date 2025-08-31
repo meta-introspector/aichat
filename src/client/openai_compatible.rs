@@ -20,23 +20,11 @@ pub struct OpenAICompatibleConfig {
 impl OpenAICompatibleClient {
     config_get_fn!(api_base, get_api_base);
     config_get_fn!(api_key, get_api_key);
-
-    pub const PROMPTS: [PromptAction<'static>; 0] = [];
 }
 
-impl_client_trait!(
-    OpenAICompatibleClient,
-    (
-        prepare_chat_completions,
-        openai_chat_completions,
-        openai_chat_completions_streaming
-    ),
-    (prepare_embeddings, openai_embeddings),
-    (prepare_rerank, generic_rerank),
-);
 
-fn prepare_chat_completions(
-    self_: &OpenAICompatibleClient,
+pub async fn prepare_chat_completions(
+    self_: &crate::client::OpenAICompatibleClient,
     data: ChatCompletionsData,
 ) -> Result<RequestData> {
     let api_key = self_.get_api_key().ok();
@@ -55,8 +43,8 @@ fn prepare_chat_completions(
     Ok(request_data)
 }
 
-fn prepare_embeddings(
-    self_: &OpenAICompatibleClient,
+pub async fn prepare_embeddings(
+    self_: &crate::client::OpenAICompatibleClient,
     data: &EmbeddingsData,
 ) -> Result<RequestData> {
     let api_key = self_.get_api_key().ok();
@@ -75,11 +63,11 @@ fn prepare_embeddings(
     Ok(request_data)
 }
 
-fn prepare_rerank(self_: &OpenAICompatibleClient, data: &RerankData) -> Result<RequestData> {
+pub fn prepare_rerank(self_: &OpenAICompatibleClient, data: &RerankData) -> Result<RequestData> {
     let api_key = self_.get_api_key().ok();
     let api_base = get_api_base_ext(self_)?;
 
-    let url = if self_.name().starts_with("ernie") {
+    let url = if Self::name(&self_.config).starts_with("ernie") {
         format!("{api_base}/rerankers")
     } else {
         format!("{api_base}/rerank")
@@ -131,7 +119,7 @@ pub async fn generic_rerank(builder: RequestBuilder, _model: &Model) -> Result<R
             }
         }
     }
-    let res_body: GenericRerankResBody =
+    let res_body: GenericRerankResBody = 
         serde_json::from_value(data).context("Invalid rerank data")?;
     Ok(res_body.results)
 }

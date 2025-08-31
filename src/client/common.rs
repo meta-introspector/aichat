@@ -36,6 +36,10 @@ static ESCAPE_SLASH_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(?<!\\)/
 
 #[async_trait::async_trait]
 pub trait Client: Sync + Send {
+    fn prompts(&self) -> &[PromptAction<'static>] {
+        &[]
+    }
+
     fn global_config(&self) -> &GlobalConfig;
 
     fn extra_config(&self) -> Option<&ExtraConfig>;
@@ -539,7 +543,7 @@ pub fn json_str_from_map<'a>(
     map.get(field_name).and_then(|v| v.as_str())
 }
 
-async fn set_client_models_config(client_config: &mut Value, client: &str) -> Result<String> {
+pub async fn set_client_models_config(client_config: &mut Value, client: &str) -> Result<String> {
     if let Some(provider) = ALL_PROVIDER_MODELS.iter().find(|v| v.provider == client) {
         let models: Vec<String> = provider
             .models
@@ -642,7 +646,7 @@ async fn set_client_models_config(client_config: &mut Value, client: &str) -> Re
     Ok(format!("{client}:{model_name}"))
 }
 
-fn select_model(model_names: Vec<String>) -> Result<String> {
+pub fn select_model(model_names: Vec<String>) -> Result<String> {
     if model_names.is_empty() {
         bail!("No models");
     }
@@ -654,7 +658,7 @@ fn select_model(model_names: Vec<String>) -> Result<String> {
     Ok(model)
 }
 
-fn prompt_input_string(
+pub fn prompt_input_string(
     desc: &str,
     required: bool,
     help_message: Option<&str>,

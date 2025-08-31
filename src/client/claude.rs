@@ -23,23 +23,11 @@ pub struct ClaudeConfig {
 impl ClaudeClient {
     config_get_fn!(api_key, get_api_key);
     config_get_fn!(api_base, get_api_base);
-
-    pub const PROMPTS: [PromptAction<'static>; 1] = [("api_key", "API Key", None)];
 }
 
-impl_client_trait!(
-    ClaudeClient,
-    (
-        prepare_chat_completions,
-        claude_chat_completions,
-        claude_chat_completions_streaming
-    ),
-    (noop_prepare_embeddings, noop_embeddings),
-    (noop_prepare_rerank, noop_rerank),
-);
 
-fn prepare_chat_completions(
-    self_: &ClaudeClient,
+pub async fn prepare_chat_completions(
+    self_: &crate::client::ClaudeClient,
     data: ChatCompletionsData,
 ) -> Result<RequestData> {
     let api_key = self_.get_api_key()?;
@@ -93,10 +81,9 @@ pub async fn claude_chat_completions_streaming(
                         data["content_block"]["id"].as_str(),
                     ) {
                         if !function_name.is_empty() {
-                            let arguments: Value =
-                                function_arguments.parse().with_context(|| {
-                                    format!("Tool call '{function_name}' have non-JSON arguments '{function_arguments}'")
-                                })?;
+                            let arguments: Value = function_arguments.parse().with_context(|| {
+                                format!("Tool call '{function_name}' have non-JSON arguments '{function_arguments}'")
+                            })?;
                             handler.tool_call(ToolCall::new(
                                 function_name.clone(),
                                 arguments,
@@ -135,7 +122,7 @@ pub async fn claude_chat_completions_streaming(
                         } else {
                             function_arguments.parse().with_context(|| {
                                 format!("Tool call '{function_name}' have non-JSON arguments '{function_arguments}'")
-                            })?
+                            })?;
                         };
                         handler.tool_call(ToolCall::new(
                             function_name.clone(),
@@ -205,7 +192,8 @@ pub fn claude_build_chat_completions_body(
                                             "data": data,
                                         }
                                     })
-                                } else {
+                                }
+                                else {
                                     network_image_urls.push(url.clone());
                                     json!({ "url": url })
                                 }
@@ -257,10 +245,7 @@ pub fn claude_build_chat_completions_body(
         .collect();
 
     if !network_image_urls.is_empty() {
-        bail!(
-            "The model does not support network images: {:?}",
-            network_image_urls
-        );
+        bail!("The model does not support network images: {:?}", network_image_urls);
     }
 
     let mut body = json!({

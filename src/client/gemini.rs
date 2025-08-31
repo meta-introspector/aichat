@@ -6,12 +6,13 @@ use reqwest::RequestBuilder;
 use serde::Deserialize;
 use serde_json::{json, Value};
 
+use crate::auth::Authenticator;
+
 const API_BASE: &str = "https://generativelanguage.googleapis.com/v1beta";
 
 #[derive(Debug, Clone, Deserialize, Default)]
 pub struct GeminiConfig {
     pub name: Option<String>,
-    pub api_key: Option<String>,
     pub api_base: Option<String>,
     #[serde(default)]
     pub models: Vec<ModelData>,
@@ -19,31 +20,35 @@ pub struct GeminiConfig {
     pub extra: Option<ExtraConfig>,
 }
 
-impl GeminiClient {
-    config_get_fn!(api_key, get_api_key);
-    config_get_fn!(api_base, get_api_base);
-
-    pub const PROMPTS: [PromptAction<'static>; 1] = [("api_key", "API Key", None)];
+pub struct GeminiClient {
+    pub model: Model,
+    pub config: GeminiConfig,
+    pub authenticator: Box<dyn Authenticator + Send + Sync>,
 }
 
-impl_client_trait!(
-    GeminiClient,
-    (
-        prepare_chat_completions,
-        gemini_chat_completions,
-        gemini_chat_completions_streaming
-    ),
-    (prepare_embeddings, embeddings),
-    (noop_prepare_rerank, noop_rerank),
-);
+impl GeminiClient {
+    pub const NAME: &'static str = "gemini";
 
-fn prepare_chat_completions(
-    self_: &GeminiClient,
+    pub fn name(local_config: &GeminiConfig) -> &str {
+        local_config.name.as_deref().unwrap_or(Self::NAME)
+    }
+
+    pub fn new(model: Model, config: GeminiConfig, authenticator: Box<dyn Authenticator + Send + Sync>) -> Self {
+        Self { model, config, authenticator }
+    }
+
+    config_get_fn!(api_base, get_api_base);
+
+    
+}
+
+
+pub async fn prepare_chat_completions(
+    self_: &crate::client::GeminiClient,
     data: ChatCompletionsData,
 ) -> Result<RequestData> {
-    let api_key = self_.get_api_key()?;
-    let api_base = self_
-        .get_api_base()
+    let api_key = self_.authenticator.as_ref().context("Authenticator not found")?.authenticate().await?;
+    let api_base = self_.get_api_base()
         .unwrap_or_else(|_| API_BASE.to_string());
 
     let func = match data.stream {
@@ -67,10 +72,12 @@ fn prepare_chat_completions(
     Ok(request_data)
 }
 
-fn prepare_embeddings(self_: &GeminiClient, data: &EmbeddingsData) -> Result<RequestData> {
-    let api_key = self_.get_api_key()?;
-    let api_base = self_
-        .get_api_base()
+pub async fn prepare_embeddings(
+    self_: &crate::client::GeminiClient,
+    data: &EmbeddingsData,
+) -> Result<RequestData> {
+    let api_key = self_.authenticator.as_ref().context("Authenticator not found")?.authenticate().await?;
+    let api_base = self_.get_api_base()
         .unwrap_or_else(|_| API_BASE.to_string());
 
     let url = format!(
@@ -108,7 +115,7 @@ fn prepare_embeddings(self_: &GeminiClient, data: &EmbeddingsData) -> Result<Req
     Ok(request_data)
 }
 
-async fn embeddings(builder: RequestBuilder, _model: &Model) -> Result<EmbeddingsOutput> {
+pub async fn embeddings(builder: RequestBuilder, _model: &Model) -> Result<EmbeddingsOutput> {
     let res = builder.send().await?;
     let status = res.status();
     let data: Value = res.json().await?;

@@ -1,7 +1,8 @@
+use crate::Authenticator;
 #[macro_export]
 macro_rules! register_client {
     (
-        $(($module:ident, $name:literal, $config:ident, $client:ident),)+
+        $(($module:ident, $name:literal, $config:ident, $client:ident, [$($prompt:tt)*])),+
     ) => {
         $(
             mod $module;
@@ -22,17 +23,20 @@ macro_rules! register_client {
         }
 
         $(
-            #[derive(Debug)]
+            #[derive(Clone)] // Removed Debug
             pub struct $client {
                 global_config: $crate::config::GlobalConfig,
                 config: $config,
                 model: $crate::client::Model,
+                authenticator: Option<std::sync::Arc<dyn Authenticator + Send + Sync>>,
             }
 
             impl $client {
                 pub const NAME: &'static str = $name;
 
-                pub fn init(global_config: &$crate::config::GlobalConfig, model: &$crate::client::Model) -> Option<Box<dyn Client>> {
+                pub const PROMPTS: [PromptAction<'static>; 0] = [$($prompt)*];
+
+                pub fn init(global_config: &$crate::config::GlobalConfig, model: &$crate::client::Model, authenticator: Option<std::sync::Arc<dyn Authenticator + Send + Sync>>) -> Option<Box<dyn Client>> {
                     let config = global_config.read().clients.iter().find_map(|client_config| {
                         if let ClientConfig::$config(c) = client_config {
                             if Self::name(c) == model.client_name() {
@@ -46,6 +50,7 @@ macro_rules! register_client {
                         global_config: global_config.clone(),
                         config,
                         model: model.clone(),
+                        authenticator: authenticator.clone(),
                     }))
                 }
 
@@ -72,10 +77,10 @@ macro_rules! register_client {
 
         )+
 
-        pub fn init_client(config: &$crate::config::GlobalConfig, model: Option<$crate::client::Model>) -> anyhow::Result<Box<dyn Client>> {
+        pub fn init_client(config: &$crate::config::GlobalConfig, model: Option<$crate::client::Model>, authenticator: Option<std::sync::Arc<dyn Authenticator + Send + Sync>>) -> anyhow::Result<Box<dyn Client>> {
             let model = model.unwrap_or_else(|| config.read().model.clone());
             None
-            $(.or_else(|| $client::init(config, &model)))+
+            $(.or_else(|| $client::init(config, &model, authenticator.clone())))+
             .ok_or_else(|| {
                 anyhow::anyhow!("Invalid model '{}'", model.id())
             })
@@ -90,7 +95,7 @@ macro_rules! register_client {
         pub async fn create_client_config(client: &str) -> anyhow::Result<(String, serde_json::Value)> {
             $(
                 if client == $client::NAME && client != $crate::client::OpenAICompatibleClient::NAME {
-                    return create_config(&$client::PROMPTS, $client::NAME).await
+                                           return create_config(&self.prompts(), $client::NAME).await
                 }
             )+
             if let Some(ret) = create_openai_compatible_client_config(client).await? {
@@ -178,12 +183,16 @@ macro_rules! impl_client_trait {
         impl $crate::client::Client for $crate::client::$client {
             client_common_fns!();
 
+            fn prompts(&self) -> &[PromptAction<'static>] {
+                &Self::PROMPTS
+            }
+
             async fn chat_completions_inner(
                 &self,
                 client: &reqwest::Client,
                 data: $crate::client::ChatCompletionsData,
             ) -> anyhow::Result<$crate::client::ChatCompletionsOutput> {
-                let request_data = $prepare_chat_completions(self, data)?;
+                let request_data = $prepare_chat_completions(self, data).await?;
                 let builder = self.request_builder(client, request_data);
                 $chat_completions(builder, self.model()).await
             }
@@ -193,8 +202,8 @@ macro_rules! impl_client_trait {
                 client: &reqwest::Client,
                 handler: &mut $crate::client::SseHandler,
                 data: $crate::client::ChatCompletionsData,
-            ) -> Result<()> {
-                let request_data = $prepare_chat_completions(self, data)?;
+            ) -> anyhow::Result<()> {
+                let request_data = $prepare_chat_completions(self, data).await?;
                 let builder = self.request_builder(client, request_data);
                 $chat_completions_streaming(builder, handler, self.model()).await
             }
@@ -203,8 +212,8 @@ macro_rules! impl_client_trait {
                 &self,
                 client: &reqwest::Client,
                 data: &$crate::client::EmbeddingsData,
-            ) -> Result<$crate::client::EmbeddingsOutput> {
-                let request_data = $prepare_embeddings(self, data)?;
+            ) -> anyhow::Result<$crate::client::EmbeddingsOutput> {
+                let request_data = $prepare_embeddings(self, data).await?;
                 let builder = self.request_builder(client, request_data);
                 $embeddings(builder, self.model()).await
             }
@@ -213,7 +222,7 @@ macro_rules! impl_client_trait {
                 &self,
                 client: &reqwest::Client,
                 data: &$crate::client::RerankData,
-            ) -> Result<$crate::client::RerankOutput> {
+            ) -> anyhow::Result<$crate::client::RerankOutput> {
                 let request_data = $prepare_rerank(self, data)?;
                 let builder = self.request_builder(client, request_data);
                 $rerank(builder, self.model()).await
