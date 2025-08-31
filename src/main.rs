@@ -6,6 +6,7 @@ mod rag;
 mod render;
 mod repl;
 mod serve;
+mod auth;
 #[macro_use]
 mod utils;
 
@@ -23,6 +24,8 @@ use crate::config::{
 use crate::render::render_error;
 use crate::repl::Repl;
 use crate::utils::*;
+use crate::auth::{Authenticator, ApiKeyAuthenticator, OAuthAuthenticator, OAuthConfig};
+use crate::auth::credential_store::CredentialStore;
 
 use anyhow::{bail, Result};
 use clap::Parser;
@@ -53,6 +56,21 @@ async fn main() -> Result<()> {
         || cli.list_sessions;
     setup_logger(working_mode.is_serve())?;
     let config = Arc::new(RwLock::new(Config::init(working_mode, info_flag).await?));
+
+    // Temporary OAuth test block
+    let oauth_config = OAuthConfig {
+        client_id: "yourkidding".to_string(),
+        client_secret: "neverever".to_string(),
+    };
+    let credential_store = Arc::new(CredentialStore::new()?);
+    let oauth_authenticator = OAuthAuthenticator::new(oauth_config, credential_store);
+
+    match oauth_authenticator.authenticate().await {
+        Ok(token) => println!("OAuth Access Token: {}", token),
+        Err(e) => eprintln!("OAuth Error: {}", e),
+    }
+    // End temporary OAuth test block
+
     if let Err(err) = run(config, cli, text).await {
         render_error(err);
         std::process::exit(1);

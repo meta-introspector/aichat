@@ -10,8 +10,10 @@ mod render_prompt;
 mod request;
 mod spinner;
 mod variables;
+mod oauth;
 
 pub use self::abort_signal::*;
+
 pub use self::clipboard::set_text;
 pub use self::command::*;
 pub use self::crypto::*;

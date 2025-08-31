@@ -6,6 +6,8 @@ use std::io::{stdin, Read};
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 pub struct Cli {
+    #[clap(subcommand)]
+    pub command: Option<Commands>,
     /// Select a LLM model
     #[clap(short, long)]
     pub model: Option<String>,
