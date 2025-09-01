@@ -44,7 +44,8 @@ impl Authenticator for OAuthAuthenticator {
                 self.config.client_secret.clone(),
             )?;
 
-        let port = crate::auth::oauth_split::find_available_port::find_available_port()?;
+        let redirect_uri_from_config = self.config.redirect_uri.clone().unwrap_or_else(|| "http://localhost:37387/".to_string());
+        let port = crate::auth::oauth_split::find_available_port::find_available_port(&redirect_uri_from_config)?;
         let redirect_uri = format!("http://localhost:{}/", port);
 
         let (authorize_url, csrf_state) = client

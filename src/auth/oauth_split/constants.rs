@@ -18,7 +18,8 @@ pub const OAUTH_SCOPE: &[&str] = &[
     "https://www.googleapis.com/auth/userinfo.profile",
 ];
 
-pub fn load_oauth_config() -> Result<(String, String)> {
+pub fn load_oauth_config(config: &crate::config::Config) -> Result<(String, String)> {
+    let redirect_uri = config.oauth.redirect_uri.clone().unwrap_or_else(|| "http://localhost:37387/".to_string());
     let path = "/data/data/com.termux/files/home/storage/github/aichat/clients/zos-solfunmeme/client_secret_637389221985-i3evf22mp7ubfrqkvinv70r379mie3nt.apps.googleusercontent.com.json";
     let content = fs::read_to_string(path)
         .map_err(|e| anyhow!("Failed to read client secret file: {}", e))?;
@@ -35,4 +36,8 @@ pub fn load_oauth_config() -> Result<(String, String)> {
         .to_string();
 
     Ok((client_id, client_secret))
+}
+
+pub fn get_oauth_redirect_uri(config: &crate::config::Config) -> String {
+    config.oauth.redirect_uri.clone().unwrap_or_else(|| "http://localhost:37387/".to_string())
 }

@@ -8,7 +8,7 @@ pub fn verify_oauth_success(home_dir: &PathBuf, output: &Output) -> Result<()> {
     assert!(output.status.success());
 
     // Verify that oauth_creds.json was created
-    let creds_path = home_dir.join(".gemini").join("oauth_creds.json");
+    let creds_path = home_dir.join(".zos").join("oauth_creds.json");
     assert!(fs::metadata(&creds_path).is_ok());
 
     // Read and verify the content of oauth_creds.json (simplified check)

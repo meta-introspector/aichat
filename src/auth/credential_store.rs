@@ -4,7 +4,7 @@ use serde_json::Value;
 use std::fs;
 use std::path::{Path, PathBuf};
 
-const GEMINI_DIR: &str = ".gemini";
+const GEMINI_DIR: &str = ".zos";
 const CREDENTIAL_FILENAME: &str = "oauth_creds.json";
 
 use super::oauth_split::user_info::UserInfo;

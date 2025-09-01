@@ -40,6 +40,7 @@ use std::{
 };
 use syntect::highlighting::ThemeSet;
 use terminal_colorsaurus::{color_scheme, ColorScheme, QueryOptions};
+use crate::auth::oauth_split::oauth_config::OAuthConfig;
 
 pub const TEMP_ROLE_NAME: &str = "%%";
 pub const TEMP_RAG_NAME: &str = "temp";
@@ -148,6 +149,8 @@ pub struct Config {
 
     pub clients: Vec<ClientConfig>,
 
+    pub oauth: OAuthConfig, // New field
+
     #[serde(skip)]
     pub macro_flag: bool,
     #[serde(skip)]
@@ -222,6 +225,8 @@ impl Default for Config {
             sync_models_url: None,
 
             clients: vec![],
+
+            oauth: Default::default(), // New field
 
             macro_flag: false,
             info_flag: false,

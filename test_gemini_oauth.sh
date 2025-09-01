@@ -3,7 +3,7 @@
 # Exit immediately if a command exits with a non-zero status.
 set -e
 
-GEMINI_CRED_FILE="$HOME/.gemini/oauth_creds.json"
+GEMINI_CRED_FILE="$HOME/.zos/oauth_creds.json"
 
 echo "--- Testing Gemini OAuth Login ---"
 
@@ -24,7 +24,7 @@ OAUTH_PID=$!
 # 3. Instruct User and Wait: Give user time to complete browser flow
 echo "Waiting for 30 seconds for you to complete the browser authentication..."
 echo "If the browser doesn't open automatically, please check the terminal for a URL."
-sleep 30
+sleep 60
 
 # 4. Kill the background process if it's still running
 if ps -p $OAUTH_PID > /dev/null; then

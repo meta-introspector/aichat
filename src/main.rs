@@ -63,7 +63,7 @@ async fn main() -> Result<()> {
     if let Some(command) = cli.command {
         match command {
             cli::Commands::Auth(auth_command) => {
-                handle_auth_command(auth_command.command).await?;
+                handle_auth_command(auth_command.command, config.clone()).await?;
             }
         }
         return Ok(());
@@ -76,14 +76,15 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn handle_auth_command(command: cli::AuthSubcommands) -> Result<()> {
+async fn handle_auth_command(command: cli::AuthSubcommands, config: GlobalConfig) -> Result<()> {
     match command {
         cli::AuthSubcommands::Login => {
             let (client_id, client_secret) =
-                crate::auth::oauth_split::constants::load_oauth_config()?;
+                crate::auth::oauth_split::constants::load_oauth_config(&config.read())?;
             let oauth_config = OAuthConfig {
                 client_id,
                 client_secret,
+                redirect_uri: Some(config.read().oauth.redirect_uri.clone().unwrap_or_else(|| "http://localhost:37387/".to_string())),
             };
             let credential_store = Arc::new(CredentialStore::new()?);
             let oauth_authenticator = OAuthAuthenticator::new(oauth_config, credential_store);

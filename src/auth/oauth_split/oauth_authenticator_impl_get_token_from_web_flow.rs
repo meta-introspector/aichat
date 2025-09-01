@@ -21,8 +21,9 @@ impl OAuthAuthenticator {
                 self.config.client_secret.clone(),
             )?;
 
-        let port = find_available_port()?;
-        let redirect_uri = format!("http://localhost:{}/", port);
+        let redirect_uri_from_config = self.config.oauth.redirect_uri.clone();
+        let port = find_available_port(&redirect_uri_from_config)?;
+        let redirect_uri = format!("http://localhost:{}/", port); // Use the port found or specified
 
         let (authorize_url, csrf_state) = client
             .authorize_url(CsrfToken::new_random)

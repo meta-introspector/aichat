@@ -92,7 +92,7 @@ This is a significant feature commit, introducing interactive OAuth authenticati
 ### Added files in `src/auth/`
 This is an entirely new module dedicated to authentication.
 
-*   **`src/auth/credential_store.rs`:** Defines `Credentials` struct (access token, refresh token, expiry, user info) and `CredentialStore` struct for reading, writing, and clearing credentials from a JSON file (`oauth_creds.json`) located in a `.gemini` directory within the user's home directory.
+*   **`src/auth/credential_store.rs`:** Defines `Credentials` struct (access token, refresh token, expiry, user info) and `CredentialStore` struct for reading, writing, and clearing credentials from a JSON file (`oauth_creds.json`) located in a `.zos` directory within the user's home directory.
 *   **`src/auth/mod.rs`:** Defines the `Authenticator` trait with an `authenticate` method that returns an access token. It also provides a basic `ApiKeyAuthenticator` implementation and re-exports modules from `oauth_split`.
 *   **`src/auth/oauth.rs`:** A simple module re-exporting `oauth_split`.
 *   **`src/auth/oauth_split/constants.rs`:** Defines OAuth client ID, client secret (placeholders), and the OAuth scopes required.
