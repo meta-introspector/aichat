@@ -8,3 +8,5 @@ pub mod oauth_authenticator_impl_fetch_and_cache_user_info;
 pub mod oauth_authenticator_impl_get_token_from_web_flow;
 pub mod find_available_port;
 pub mod oauth_authenticator_trait_impl_authenticate;
+pub mod web_flow_listener;
+pub mod web_flow_token_exchange;
