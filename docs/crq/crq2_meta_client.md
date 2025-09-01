@@ -22,3 +22,7 @@
     4.  `https://github.com/Byron/google-apis-rs`
     5.  `https://github.com/googleapis/google-cloud-rust`
     6.  `https://github.com/abdolence/gcloud-sdk-rs`
+
+## Detailed Implementation Plan
+
+A detailed Standard Operating Procedure (SOP) for the implementation of this Meta Client has been documented in `docs/sops/implementing_meta_client.md`.

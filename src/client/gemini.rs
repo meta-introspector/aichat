@@ -75,7 +75,7 @@ pub async fn prepare_chat_completions(
 
     let mut request_data = RequestData::new(url, body);
 
-    request_data.header("x-goog-api-key", api_key);
+    request_data.header("Authorization", format!("Bearer {}", api_key));
 
     Ok(request_data)
 }
@@ -89,10 +89,9 @@ pub async fn prepare_embeddings(
         .unwrap_or_else(|_| API_BASE.to_string());
 
     let url = format!(
-        "{}/models/{}:batchEmbedContents?key={}",
+        "{}/models/{}:batchEmbedContents",
         api_base.trim_end_matches('/'),
         self_.model.real_name(),
-        api_key
     );
 
     let model_id = format!("models/{}", self_.model.real_name());
@@ -118,7 +117,9 @@ pub async fn prepare_embeddings(
         "requests": requests,
     });
 
-    let request_data = RequestData::new(url, body);
+    let mut request_data = RequestData::new(url, body);
+
+    request_data.header("Authorization", format!("Bearer {}", api_key));
 
     Ok(request_data)
 }

@@ -1,7 +1,7 @@
 use anyhow::{Context, Result};
 use clap::{Args, Parser};
 use is_terminal::IsTerminal;
-use std::io::{stdin, Read};
+use std::{io::{stdin, Read}, path::PathBuf};
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -106,6 +106,20 @@ pub enum AuthSubcommands {
     Login,
     /// Manage Google Cloud OAuth configurations
     ManageGoogleOAuth,
+    /// Manage Google Cloud OAuth client configurations (e.g., redirect URIs)
+    ManageGoogleOAuthClient,
+    /// Login with Google Gemini OAuth
+    GeminiLogin,
+    /// Import client secrets from a file
+    #[clap(name = "import-secrets")]
+    ImportSecrets {
+        /// Path to the client secret JSON file
+        #[clap(short, long)]
+        file: PathBuf,
+        /// Name of the client (e.g., "meta-client", "gemini")
+        #[clap(short, long)]
+        client: String,
+    },
 }
 
 impl Cli {

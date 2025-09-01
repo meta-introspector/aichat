@@ -41,3 +41,22 @@ pub fn load_oauth_config(config: &crate::config::Config) -> Result<(String, Stri
 pub fn get_oauth_redirect_uri(config: &crate::config::Config) -> String {
     config.oauth.redirect_uri.clone().unwrap_or_else(|| "http://localhost:37387/".to_string())
 }
+
+pub fn load_gemini_oauth_config(config: &crate::config::Config) -> Result<(String, String)> {
+    let path = crate::config::Config::config_dir().join("clients").join("gemini").join("client_secret.json");
+    let content = fs::read_to_string(path)
+        .map_err(|e| anyhow!("Failed to read Gemini client secret file: {}", e))?;
+    let json: Value = serde_json::from_str(&content)
+        .map_err(|e| anyhow!("Failed to parse Gemini client secret JSON: {}", e))?;
+
+    let client_id = json["web"]["client_id"]
+        .as_str()
+        .ok_or_else(|| anyhow!("client_id not found in Gemini JSON"))?
+        .to_string();
+    let client_secret = json["web"]["client_secret"]
+        .as_str()
+        .ok_or_else(|| anyhow!("client_secret not found in Gemini JSON"))?
+        .to_string();
+
+    Ok((client_id, client_secret))
+}
