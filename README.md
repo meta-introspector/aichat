@@ -167,6 +167,10 @@ AIChat supports custom dark and light themes, which highlight response text and 
 
 The project's architecture emphasizes modularity and clear separation of concerns, particularly evident in the `src/auth/oauth_split` directory. This granular breakdown of the OAuth flow into smaller, single-responsibility modules enhances readability, maintainability, and extensibility.
 
+### OAuth Configuration
+
+For OAuth-based authentication, `aichat` now stores credentials in a `.zos` directory within your home directory (e.g., `~/.zos/oauth_creds.json`). The OAuth redirect URI can be configured in `config.yaml` under the `oauth.redirect_uri` field. This allows you to specify a fixed port for development, such as `http://localhost:8080/`.
+
 Internal macros and their documentation, such as `config_get_fn!`, can be found directly in the source code, for example, in `src/client/macros.rs`.
 
 ## License

@@ -9,7 +9,9 @@ const CREDENTIAL_FILENAME: &str = "oauth_creds.json";
 
 use super::oauth_split::user_info::UserInfo;
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+use std::fmt;
+
+#[derive(Clone, Deserialize, Serialize)]
 pub struct Credentials {
     // These fields should match the structure of oauth_creds.json
     pub access_token: String,
@@ -17,6 +19,18 @@ pub struct Credentials {
     pub token_type: Option<String>,
     pub expiry_date: Option<i64>,
     pub user_info: Option<UserInfo>,
+}
+
+impl fmt::Debug for Credentials {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Credentials")
+            .field("access_token", &"********************") // Redact access token
+            .field("refresh_token", &self.refresh_token.as_ref().map(|_| "********************")) // Redact refresh token
+            .field("token_type", &self.token_type)
+            .field("expiry_date", &self.expiry_date)
+            .field("user_info", &self.user_info)
+            .finish()
+    }
 }
 
 #[derive(Debug)]

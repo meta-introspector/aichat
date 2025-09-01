@@ -33,11 +33,14 @@ if ps -p $OAUTH_PID > /dev/null; then
   sleep 1 # Give it a moment to terminate
 fi
 
-# 5. Verify: Check if the credentials file exists
+# 5. Verify: Check if the credentials file exists and contains tokens
 if [ -f "$GEMINI_CRED_FILE" ]; then
-  echo "Gemini OAuth login test: SUCCESS! Credentials file found at $GEMINI_CRED_FILE"
-  # Optionally, you could add a step here to try and use the credentials
-  # For example: aichat --client gemini "test prompt"
+  if grep -q "access_token" "$GEMINI_CRED_FILE" && grep -q "refresh_token" "$GEMINI_CRED_FILE"; then
+    echo "Gemini OAuth login test: SUCCESS! Credentials file created and contains tokens."
+  else
+    echo "Gemini OAuth login test: FAILED! Credentials file found but does not contain expected tokens."
+    exit 1
+  fi
 else
   echo "Gemini OAuth login test: FAILED! Credentials file not found at $GEMINI_CRED_FILE"
   exit 1
