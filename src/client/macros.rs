@@ -1,3 +1,4 @@
+#[allow(unused_imports)]
 use crate::Authenticator;
 #[macro_export]
 macro_rules! register_client {

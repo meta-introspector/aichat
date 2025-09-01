@@ -24,7 +24,7 @@ Download pre-built binaries for macOS, Linux, and Windows from [GitHub Releases]
 
 ### Multi-Providers
 
-Integrate seamlessly with over 20 leading LLM providers through a unified interface. Supported providers include OpenAI, Claude, Gemini (Google AI Studio), Ollama, Groq, Azure-OpenAI, VertexAI, Bedrock, Github Models, Mistral, Deepseek, AI21, XAI Grok, Cohere, Perplexity, Cloudflare, OpenRouter, Ernie, Qianwen, Moonshot, ZhipuAI, MiniMax, Deepinfra, VoyageAI, any OpenAI-Compatible API provider.
+Integrate seamlessly with over 20 leading LLM providers through a unified interface. The underlying authentication system, particularly for OAuth-based providers like Gemini, has been refactored into a highly modular and maintainable structure, enhancing security and extensibility. Supported providers include OpenAI, Claude, Gemini (Google AI Studio), Ollama, Groq, Azure-OpenAI, VertexAI, Bedrock, Github Models, Mistral, Deepseek, AI21, XAI Grok, Cohere, Perplexity, Cloudflare, OpenRouter, Ernie, Qianwen, Moonshot, ZhipuAI, MiniMax, Deepinfra, VoyageAI, any OpenAI-Compatible API provider.
 
 ### CMD Mode
 
@@ -164,6 +164,8 @@ AIChat supports custom dark and light themes, which highlight response text and 
 - [FAQ](https://github.com/sigoden/aichat/wiki/FAQ)
 
 ## Developer Documentation
+
+The project's architecture emphasizes modularity and clear separation of concerns, particularly evident in the `src/auth/oauth_split` directory. This granular breakdown of the OAuth flow into smaller, single-responsibility modules enhances readability, maintainability, and extensibility.
 
 Internal macros and their documentation, such as `config_get_fn!`, can be found directly in the source code, for example, in `src/client/macros.rs`.
 
