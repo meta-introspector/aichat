@@ -104,6 +104,8 @@ pub struct AuthCommands {
 pub enum AuthSubcommands {
     /// Login with OAuth
     Login,
+    /// Manage Google Cloud OAuth configurations
+    ManageGoogleOAuth,
 }
 
 impl Cli {

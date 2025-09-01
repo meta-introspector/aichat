@@ -10,7 +10,22 @@ pub async fn run_web_auth_flow(
     csrf_state: CsrfToken,
     port: u16,
 ) -> Result<(AuthorizationCode, CsrfToken)> {
-    println!("Open this URL in your browser:\n{}\n", authorize_url);
+    let mut redacted_authorize_url = authorize_url.clone();
+    {
+        let mut query_pairs = redacted_authorize_url.query_pairs_mut();
+        query_pairs.clear();
+        for (key, value) in authorize_url.query_pairs().into_iter() {
+            match key.as_ref() {
+                "client_id" | "client_secret" | "code_challenge" | "state" => {
+                    query_pairs.append_pair(&key, "REDACTED");
+                },
+                _ => {
+                    query_pairs.append_pair(&key, &value);
+                }
+            }
+        }
+    }
+    println!("Open this URL in your browser:\n{}\n", redacted_authorize_url);
     open::that(authorize_url.as_str()).context("Failed to open browser")?;
 
     println!("Attempting to bind TcpListener to 127.0.0.1:{}", port);

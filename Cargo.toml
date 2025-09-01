@@ -71,6 +71,7 @@ duct = "1.0.0"
 oauth2 = { version = "5.0.0", features = ["reqwest"], default-features = false }
 open = "5.0"
 url = "2.x" # Added for URL parsing
+gcloud-sdk = { path = "vendor/gcloud-sdk-rs/gcloud-sdk" } # Vendorized gcloud-sdk-rs
 
 [dependencies.reqwest]
 version = "0.12.12"
