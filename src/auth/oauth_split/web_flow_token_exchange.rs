@@ -1,10 +1,12 @@
 use anyhow::{Result, Context};
-use oauth2::basic::{BasicClient, BasicTokenResponse};
-use oauth2::{AuthorizationCode, PkceCodeVerifier, RedirectUrl, TokenResponse};
+use oauth2::basic::BasicTokenResponse;
+use oauth2::{AuthorizationCode, PkceCodeVerifier, RedirectUrl};
 use std::borrow::Cow;
 
+use crate::auth::oauth_split::constants::GoogleOAuthClient;
+
 pub async fn exchange_code_for_token(
-    client: &BasicClient,
+    client: GoogleOAuthClient,
     code: AuthorizationCode,
     pkce_code_verifier: PkceCodeVerifier,
     redirect_uri: String,

@@ -1,6 +1,16 @@
 use std::fs;
 use serde_json::Value;
 use anyhow::{Result, anyhow};
+use oauth2::basic::BasicClient;
+use oauth2::{EndpointSet, EndpointNotSet};
+
+pub type GoogleOAuthClient = BasicClient<
+    EndpointSet, // HasAuthUrl
+    EndpointNotSet, // HasDeviceAuthUrl
+    EndpointNotSet, // HasIntrospectionUrl
+    EndpointNotSet, // HasRevocationUrl
+    EndpointSet, // HasTokenUrl
+>;
 
 pub const OAUTH_SCOPE: &[&str] = &[
     "https://www.googleapis.com/auth/cloud-platform",

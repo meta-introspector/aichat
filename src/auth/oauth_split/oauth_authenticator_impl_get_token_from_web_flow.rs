@@ -1,15 +1,7 @@
 use anyhow::{Result, Context};
-use std::io::{BufReader, Write, BufRead};
-use std::net::TcpListener;
-use oauth2::url::Url;
-use chrono::{Utc, Duration};
 use std::borrow::Cow;
 
-use oauth2::basic::BasicClient;
-
-use oauth2::{AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken, RedirectUrl, Scope, TokenResponse, TokenUrl};
-use reqwest;
-use open;
+use oauth2::{AuthUrl, ClientId, ClientSecret, CsrfToken, RedirectUrl, Scope, TokenUrl};
 
 use crate::auth::credential_store::{Credentials};
 use crate::auth::oauth_split::constants::{OAUTH_SCOPE};
@@ -17,23 +9,20 @@ use crate::auth::oauth_split::oauth_config::OAuthConfig;
 use crate::auth::oauth_split::oauth_authenticator_struct::OAuthAuthenticator;
 use crate::auth::oauth_split::find_available_port::find_available_port;
 use crate::auth::oauth_split::user_info::UserInfo;
+use crate::auth::oauth_split::oauth_client_setup;
+use crate::auth::oauth_split::web_auth_flow;
+use crate::auth::oauth_split::web_flow_token_exchange;
 
 impl OAuthAuthenticator {
     pub async fn get_token_from_web_flow(&self) -> Result<Credentials> {
-        let client = BasicClient::new(
-            ClientId::new(self.config.client_id.clone()),
-        )
-        .set_client_secret(ClientSecret::new(self.config.client_secret.clone()))
-        .set_auth_uri(AuthUrl::new("https://accounts.google.com/o/oauth2/v2/auth".to_string())?)
-        .set_token_uri(TokenUrl::new("https://oauth2.googleapis.com/token".to_string())?);
-
-        let (pkce_code_challenge, pkce_code_verifier) = 
-            oauth2::PkceCodeChallenge::new_random_sha256();
+        let (client, pkce_code_challenge, pkce_code_verifier) =
+            oauth_client_setup::setup_oauth_client(
+                self.config.client_id.clone(),
+                self.config.client_secret.clone(),
+            )?;
 
         let port = find_available_port()?;
-        let redirect_uri = format!("http://localhost:{}/", port); // Added trailing slash for consistency
-        println!("Listening on port: {}", port);
-        println!("Redirect URI: {}", redirect_uri);
+        let redirect_uri = format!("http://localhost:{}/", port);
 
         let (authorize_url, csrf_state) = client
             .authorize_url(CsrfToken::new_random)
@@ -42,91 +31,23 @@ impl OAuthAuthenticator {
             .set_redirect_uri(Cow::Owned(RedirectUrl::new(redirect_uri.clone()).unwrap()))
             .url();
 
-        println!("Open this URL in your browser:\n{}\n", authorize_url);
-        open::that(authorize_url.as_str()).context("Failed to open browser")?;
+        let (code, received_state) = web_auth_flow::run_web_auth_flow(
+            authorize_url,
+            csrf_state.clone(),
+            port,
+        ).await?;
 
-        println!("Attempting to bind TcpListener to 127.0.0.1:{}", port);
-        let listener = TcpListener::bind(format!("127.0.0.1:{}", port))?;
-        println!("TcpListener bound successfully.");
+        if received_state.secret() != csrf_state.secret() {
+            return Err(anyhow::anyhow!("State mismatch. Possible CSRF attack"));
+        }
 
-        let token_response = loop {
-            println!("Waiting for incoming connection...");
-            let mut stream = listener.incoming().flatten().next().context("Listener terminated without accepting a connection")?;
-            println!("Incoming connection received.");
-
-            let mut reader = BufReader::new(&stream);
-            let mut request_line = String::new();
-            reader.read_line(&mut request_line)?;
-            println!("Request line: {}", request_line);
-
-            let redirect_url_path = request_line.split_whitespace().nth(1).context("Invalid redirect URL")?;
-            let url = Url::parse(&format!("http://localhost:{}{}", port, redirect_url_path))?;
-            println!("Parsed URL: {}", url);
-
-            let code = url
-                .query_pairs()
-                .find(|(key, _)| key == "code")
-                .map(|(_, code)| AuthorizationCode::new(code.into_owned()));
-
-            let state = url
-                .query_pairs()
-                .find(|(key, _)| key == "state")
-                .map(|(_, state)| CsrfToken::new(state.into_owned()));
-
-            if let (Some(code), Some(state)) = (code, state) {
-                if state.secret() != csrf_state.secret() {
-                    let msg = "State mismatch. Possible CSRF attack.";
-                    let response = format!(
-                        "HTTP/1.1 200 OK\r\ncontent-length: {}\r\n\r\n{}",
-                        msg.len(),
-                        msg
-                    );
-                    stream.write_all(response.as_bytes())?;
-                    continue; // Continue to next iteration to wait for a valid request
-                } else {
-                    println!("Attempting to exchange code for token...");
-                    match client
-                        .exchange_code(code)
-                        .set_pkce_verifier(pkce_code_verifier) // pkce_code_verifier is moved here, so it's only used once
-                        .set_redirect_uri(Cow::Owned(RedirectUrl::new(redirect_uri.clone()).unwrap()))
-                        .request_async(&reqwest::Client::new())
-                        .await
-                    {
-                        Ok(token_response) => {
-                            println!("Token exchange successful.");
-                            let msg = "Authentication successful! You can close this tab.";
-                            let response = format!(
-                                "HTTP/1.1 200 OK\r\ncontent-length: {}\r\n\r\n{}",
-                                msg.len(),
-                                msg
-                            );
-                            stream.write_all(response.as_bytes())?;
-                            break token_response;
-                        }
-                        Err(e) => {
-                            eprintln!("Failed to exchange code for token: {}", e);
-                            let msg = "Failed to exchange code for token.";
-                            let response = format!(
-                                "HTTP/1.1 200 OK\r\ncontent-length: {}\r\n\r\n{}",
-                                msg.len(),
-                                msg
-                            );
-                            stream.write_all(response.as_bytes())?;
-                            continue; // Continue to next iteration on error
-                        }
-                    }
-                }
-            } else {
-                let msg = "No code or state found in redirect URL.";
-                let response = format!(
-                    "HTTP/1.1 200 OK\r\ncontent-length: {}\r\n\r\n{}",
-                    msg.len(),
-                    msg
-                );
-                stream.write_all(response.as_bytes())?;
-                continue; // Continue to next iteration if no code/state
-            };
-        };
+        let token_response = web_flow_token_exchange::exchange_code_for_token(
+            &client,
+            code,
+            pkce_code_verifier,
+            redirect_uri.clone(),
+        )
+        .await?;
 
         let access_token = token_response.access_token().secret().to_string();
 
