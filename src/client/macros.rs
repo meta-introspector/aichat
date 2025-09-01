@@ -183,6 +183,10 @@ macro_rules! impl_client_trait {
         impl $crate::client::Client for $crate::client::$client {
             client_common_fns!();
 
+            fn get_api_base(&self) -> anyhow::Result<String> {
+                self.get_api_base()
+            }
+
             fn prompts(&self) -> &[PromptAction<'static>] {
                 &Self::PROMPTS
             }
@@ -231,6 +235,19 @@ macro_rules! impl_client_trait {
     };
 }
 
+#[macro_export]
+/// Generates a public getter function for a configuration field.
+///
+/// This macro creates a function named `$fn_name` that attempts to retrieve a configuration value.
+/// It first checks for an environment variable named `ENV_PREFIX_FIELD_NAME` (where `ENV_PREFIX`
+/// is the uppercase client name and `FIELD_NAME` is the uppercase field name).
+/// If the environment variable is not found, it falls back to the value in `self.config.$field_name`.
+/// If neither is found, it returns an error.
+///
+/// # Arguments
+///
+/// * `$field_name` - The name of the field in the client's configuration struct (e.g., `api_base`).
+/// * `$fn_name` - The desired name of the generated getter function (e.g., `get_api_base`).
 #[macro_export]
 macro_rules! config_get_fn {
     ($field_name:ident, $fn_name:ident) => {

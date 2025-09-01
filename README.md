@@ -163,6 +163,10 @@ AIChat supports custom dark and light themes, which highlight response text and 
 - [Custom REPL Prompt](https://github.com/sigoden/aichat/wiki/Custom-REPL-Prompt)
 - [FAQ](https://github.com/sigoden/aichat/wiki/FAQ)
 
+## Developer Documentation
+
+Internal macros and their documentation, such as `config_get_fn!`, can be found directly in the source code, for example, in `src/client/macros.rs`.
+
 ## License
 
 Copyright (c) 2023-2025 aichat-developers.

@@ -46,6 +46,8 @@ pub trait Client: Sync + Send {
 
     fn patch_config(&self) -> Option<&RequestPatch>;
 
+    fn get_api_base(&self) -> anyhow::Result<String>;
+
     fn name(&self) -> &str;
 
     fn model(&self) -> &Model;
