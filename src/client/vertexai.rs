@@ -1,15 +1,11 @@
-use super::access_token::*;
-use super::claude::*;
-use super::openai::*;
-use super::*;
-use crate::config_get_fn;
+use super::access_token ::*;use super::claude ::*;use super::openai ::*;use super ::*;use crate :: config_get_fn;
 
 use anyhow::{anyhow, bail, Context, Result};
 use chrono::{Duration, Utc};
 use reqwest::{Client as ReqwestClient, RequestBuilder};
 use serde::Deserialize;
 use serde_json::{json, Value};
-use std::{path::PathBuf, str::FromStr};
+use std::{path :: PathBuf, str :: FromStr};
 
 #[derive(Debug, Clone, Deserialize, Default)]
 pub struct VertexAIConfig {
@@ -24,34 +20,36 @@ pub struct VertexAIConfig {
 }
 
 impl VertexAIClient {
-    pub fn get_project_id(&self) -> anyhow::Result<String> {
-        let env_prefix = Self::name(&self.config);
+    pub fn get_project_id(&self) -> anyhow :: Result<String> {
+        let env_prefix = Self :: name(&self.config);
         let env_name =
-            format!("{}_{}", env_prefix, stringify!(project_id)).to_ascii_uppercase();
-        std::env::var(&env_name)
+            format!("{}
+_{}", env_prefix, stringify!(project_id)).to_ascii_uppercase();
+        std::env :: var(&env_name)
             .ok()
             .or_else(|| self.config.project_id.clone())
-            .ok_or_else(|| anyhow::anyhow!("Miss '{}'", stringify!(project_id)))
+            .ok_or_else(|| anyhow :: anyhow!("Miss '{}'", stringify!(project_id)))
     }
 
-    pub fn get_location(&self) -> anyhow::Result<String> {
-        let env_prefix = Self::name(&self.config);
+    pub fn get_location(&self) -> anyhow :: Result<String> {
+        let env_prefix = Self :: name(&self.config);
         let env_name =
-            format!("{}_{}", env_prefix, stringify!(location)).to_ascii_uppercase();
-        std::env::var(&env_name)
+            format!("{}
+_{}", env_prefix, stringify!(location)).to_ascii_uppercase();
+        std::env :: var(&env_name)
             .ok()
             .or_else(|| self.config.location.clone())
-            .ok_or_else(|| anyhow::anyhow!("Miss '{}'", stringify!(location)))
+            .ok_or_else(|| anyhow :: anyhow!("Miss '{}'", stringify!(location)))
     }
 }
 
 
 
 pub async fn prepare_chat_completions(
-    self_: &crate::client::VertexAIClient,
+    self_: &crate :: client :: VertexAIClient,
     data: ChatCompletionsData,
 ) -> Result<RequestData> {
-    let model_category = ModelCategory::from_str(self_.model().real_name())?;
+    let model_category = ModelCategory :: from_str(self_.model().real_name())?;
     let project_id = self_.get_project_id()?;
     let location = self_.get_location()?;
     let access_token = get_access_token(self_.name())?;
@@ -110,6 +108,31 @@ pub async fn prepare_chat_completions(
     Ok(request_data)
 }
 
+
+pub async fn prepare_embeddings(
+    self_: &crate :: client :: VertexAIClient,
+    data: &EmbeddingsData,
+) -> Result<RequestData> {
+    let project_id = self_.get_project_id()?;
+    let location = self_.get_location()?;
+    let access_token = get_access_token(self_.name())?;
+
+    let url = format!(
+        "https://{location}-aiplatform.googleapis.com/v1/projects/{project_id}/locations/{location}/publishers/google/models/text-embedding-garden/predict"
+    );
+
+    let body = json!({
+        "instances": [
+            { "content": data.texts[0] }
+        ]
+    });
+
+    let mut request_data = RequestData::new(url, body);
+
+    request_data.bearer_auth(access_token);
+
+    Ok(request_data)
+}
 
 
 pub async fn gemini_chat_completions(
@@ -322,7 +345,7 @@ pub fn gemini_build_chat_completions_body(
     let mut body = json!({ "contents": contents, "generationConfig": {} });
 
     if let Some(v) = system_message {
-        body["systemInstruction"] = json!({ "parts": [{"text": v }] });
+        body["systemInstruction"] = json!({ "parts": [{ "text": v }] });
     }
 
     if let Some(v) = model.max_tokens_param() {
@@ -364,9 +387,9 @@ enum ModelCategory {
 }
 
 impl FromStr for ModelCategory {
-    type Err = anyhow::Error;
+    type Err = anyhow :: Error;
 
-    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
+    fn from_str(s: &str) -> std::result :: Result<Self, Self :: Err> {
         if s.starts_with("gemini") {
             Ok(ModelCategory::Gemini)
         } else if s.starts_with("claude") {
@@ -380,7 +403,7 @@ impl FromStr for ModelCategory {
 }
 
 pub async fn prepare_gcloud_access_token(
-    client: &reqwest::Client,
+    client: &reqwest :: Client,
     client_name: &str,
     adc_file: &Option<String>,
 ) -> Result<()> {
@@ -397,7 +420,7 @@ pub async fn prepare_gcloud_access_token(
 }
 
 async fn fetch_access_token(
-    client: &reqwest::Client,
+    client: &reqwest :: Client,
     file: &Option<String>,
 ) -> Result<(String, i64)> {
     let credentials = load_adc(file).await?;
@@ -428,11 +451,13 @@ async fn load_adc(file: &Option<String>) -> Result<Value> {
         .ok_or_else(|| anyhow!("No application_default_credentials.json"))?;
     let data = tokio::fs::read_to_string(adc_file).await?;
     let data: Value = serde_json::from_str(&data)?;
-    if let (Some(client_id), Some(client_secret), Some(refresh_token)) = (
-        data["client_id"].as_str(),
-        data["client_secret"].as_str(),
-        data["refresh_token"].as_str(),
-    ) {
+    if let (Some(client_id), Some(client_secret), Some(refresh_token)) =
+        (
+            data["client_id"].as_str(),
+            data["client_secret"].as_str(),
+            data["refresh_token"].as_str(),
+        )
+    {
         Ok(json!({
             "client_id": client_id,
             "client_secret": client_secret,

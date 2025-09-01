@@ -28,6 +28,7 @@ use crate::auth::{Authenticator, ApiKeyAuthenticator};
 use crate::auth::oauth_split::oauth_authenticator_struct::OAuthAuthenticator;
 use crate::auth::oauth_split::oauth_config::OAuthConfig;
 use crate::auth::credential_store::CredentialStore;
+use crate::auth::oauth_split::constants;
 
 use anyhow::{bail, Result};
 use clap::Parser;
@@ -78,11 +79,11 @@ async fn main() -> Result<()> {
 async fn handle_auth_command(command: cli::AuthSubcommands) -> Result<()> {
     match command {
         cli::AuthSubcommands::Login => {
-            // TODO: Load client_id and client_secret securely, e.g., from environment variables or a config file.
-            // For now, using placeholders. REPLACE THESE WITH YOUR ACTUAL CREDENTIALS.
+            let (client_id, client_secret) =
+                crate::auth::oauth_split::constants::load_oauth_config()?;
             let oauth_config = OAuthConfig {
-                client_id: "YOUR_CLIENT_ID".to_string(),
-                client_secret: "YOUR_CLIENT_SECRET".to_string(),
+                client_id,
+                client_secret,
             };
             let credential_store = Arc::new(CredentialStore::new()?);
             let oauth_authenticator = OAuthAuthenticator::new(oauth_config, credential_store);

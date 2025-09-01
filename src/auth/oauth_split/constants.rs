@@ -1,7 +1,27 @@
-pub const OAUTH_CLIENT_ID: &str = "never.apps.googleusercontent.com";
-pub const OAUTH_CLIENT_SECRET: &str = "inamillionyears";
+use std::fs;
+use serde_json::Value;
+
 pub const OAUTH_SCOPE: &[&str] = &[
     "https://www.googleapis.com/auth/cloud-platform",
     "https://www.googleapis.com/auth/userinfo.email",
     "https://www.googleapis.com/auth/userinfo.profile",
 ];
+
+pub fn load_oauth_config() -> Result<(String, String), String> {
+    let path = "/data/data/com.termux/files/home/storage/github/aichat/clients/zos-solfunmeme/client_secret_637389221985-i3evf22mp7ubfrqkvinv70r379mie3nt.apps.googleusercontent.com.json";
+    let content = fs::read_to_string(path)
+        .map_err(|e| format!("Failed to read client secret file: {}", e))?;
+    let json: Value = serde_json::from_str(&content)
+        .map_err(|e| format!("Failed to parse client secret JSON: {}", e))?;
+
+    let client_id = json["web"]["client_id"]
+        .as_str()
+        .ok_or("client_id not found in JSON")?
+        .to_string();
+    let client_secret = json["web"]["client_secret"]
+        .as_str()
+        .ok_or("client_secret not found in JSON")?
+        .to_string();
+
+    Ok((client_id, client_secret))
+}
