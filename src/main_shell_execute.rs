@@ -68,7 +68,7 @@ pub async fn shell_execute(
                             &input,
                             client.as_ref(),
                             abort_signal.clone(),
-                        )?;
+                        ).await?;
                     } else {
                         call_chat_completions(
                             &input,

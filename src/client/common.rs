@@ -23,7 +23,7 @@ use tokio::sync::mpsc::unbounded_channel;
 const MODELS_YAML: &str = include_str!("../../models.yaml");
 
 pub static ALL_PROVIDER_MODELS: LazyLock<Vec<ProviderModels>> = LazyLock::new(|| {
-    Config::loal_models_override()
+    Config::load_models_override()
         .ok()
         .unwrap_or_else(|| serde_yaml::from_str(MODELS_YAML).unwrap())
 });

@@ -468,7 +468,7 @@ impl Config {
 
     pub fn edit_config(&self) -> Result<()> {
         let config_path = Self::config_file();
-        let editor = self.editor()?;
+        let editor = self.editor.clone().unwrap_or_else(|| "vi".to_string()); // Provide a default editor if none is configured
         edit_file(&editor, &config_path)?;
         println!(
             "NOTE: Remember to restart {} if there are changes made to '{}'",
@@ -613,31 +613,59 @@ impl Config {
         let value = parts[1];
         match key {
             "temperature" => {
-                // let value = parse_value(value)?;
+                let value = if value == "null" {
+                    None
+                } else {
+                    Some(value.parse().with_context(|| "Invalid value")?)
+                };
                 config.write().set_temperature(value);
             }
             "top_p" => {
-                // let value = parse_value(value)?;
+                let value = if value == "null" {
+                    None
+                } else {
+                    Some(value.parse().with_context(|| "Invalid value")?)
+                };
                 config.write().set_top_p(value);
             }
             "use_tools" => {
-                // let value = parse_value(value)?;
+                let value = if value == "null" {
+                    None
+                } else {
+                    Some(value.to_string())
+                };
                 config.write().set_use_tools(value);
             }
             "max_output_tokens" => {
-                // let value = parse_value(value)?;
+                let value = if value == "null" {
+                    None
+                } else {
+                    Some(value.parse().with_context(|| "Invalid value")?)
+                };
                 config.write().set_max_output_tokens(value);
             }
             "save_session" => {
-                // let value = parse_value(value)?;
+                let value = if value == "null" {
+                    None
+                } else {
+                    Some(value.parse().with_context(|| "Invalid value")?)
+                };
                 config.write().set_save_session(value);
             }
             "compress_threshold" => {
-                // let value = parse_value(value)?;
+                let value = if value == "null" {
+                    None
+                } else {
+                    Some(value.parse().with_context(|| "Invalid value")?)
+                };
                 config.write().set_compress_threshold(value);
             }
             "rag_reranker_model" => {
-                // let value = parse_value(value)?;
+                let value = if value == "null" {
+                    None
+                } else {
+                    Some(value.to_string())
+                };
                 Self::set_rag_reranker_model(config, value)?;
             }
             "rag_top_k" => {
@@ -956,7 +984,7 @@ impl Config {
     pub fn upsert_role(&mut self, name: &str) -> Result<()> {
         let role_path = Self::role_file(name);
         // ensure_parent_exists(&role_path)?;
-        let editor = self.editor()?;
+        let editor = self.editor.clone().unwrap_or_else(|| "vi".to_string()); // Provide a default editor if none is configured
         edit_file(&editor, &role_path)?;
         if self.working_mode.is_repl() {
             println!("✓ Saved the role to '{}'.", role_path.display());
@@ -1146,7 +1174,7 @@ impl Config {
         };
         let session_path = self.session_file(&name);
         self.save_session(Some(&name))?;
-        let editor = self.editor()?;
+        let editor = self.editor.clone().unwrap_or_else(|| "vi".to_string()); // Provide a default editor if none is configured
         edit_file(&editor, &session_path).with_context(|| {
             format!("Failed to edit '{}' with '{}'", session_path.display(), editor)
         })?;

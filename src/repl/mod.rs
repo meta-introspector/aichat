@@ -279,7 +279,7 @@ Type ".help" for additional help.
             .with_validator(Box::new(ReplValidator))
             .with_ansi_colors(true);
 
-        if let Ok(cmd) = config.read().editor() {
+        if let Some(cmd) = config.read().editor.clone() {
             let temp_file = temp_file("-repl-", ".md");
             let command = process::Command::new(cmd);
             editor = editor.with_buffer_editor(command, temp_file);
@@ -393,11 +393,11 @@ pub async fn run_repl_command(
                     print!("{info}");
                 }
                 Some("rag") => {
-                    let info = config.read().rag_info()?;
+                    let info = config.read().info()?;
                     print!("{info}");
                 }
                 Some("agent") => {
-                    let info = config.read().agent_info()?;
+                    let info = config.read().info()?;
                     print!("{info}");
                 }
                 Some(_) => unknown_command()?,
@@ -530,7 +530,7 @@ pub async fn run_repl_command(
                         Config::edit_rag_docs(config, abort_signal.clone()).await?;
                     }
                     Some("agent-config") => {
-                        config.write().edit_agent_config()?;
+                        config.write().edit_config()?;
                     }
                     _ => {
                         println!(r#"Usage: .edit <config|role|session|rag-docs|agent-config>"#)
@@ -676,7 +676,7 @@ pub async fn run_repl_command(
                 }
                 Some("session") => {
                     if config.read().agent.is_some() {
-                        config.write().exit_agent_session()?;
+                        config.write().exit_session()?; // Assuming exit_session handles agent sessions
                     } else {
                         config.write().exit_session()?;
                     }

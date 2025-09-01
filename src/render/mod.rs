@@ -4,7 +4,8 @@ mod stream;
 pub use self::markdown::{MarkdownRender, RenderOptions};
 use self::stream::{markdown_stream, raw_stream};
 
-use crate::utils::{error_text, pretty_error, AbortSignal, IS_STDOUT_TERMINAL};
+use crate::utils::{abort_signal, create_abort_signal, dimmed_text, set_text, temp_file, AbortSignal};
+use std::ops::Deref;
 use crate::{client::SseEvent, config::GlobalConfig};
 
 use anyhow::Result;
@@ -16,7 +17,7 @@ pub async fn render_stream(
     abort_signal: AbortSignal,
 ) -> Result<()> {
     let ret = if *IS_STDOUT_TERMINAL && config.read().highlight {
-        let render_options = config.read().render_options()?;
+        let render_options = config.read().deref().render_options()?;
         let mut render = MarkdownRender::init(render_options)?;
         markdown_stream(rx, &mut render, &abort_signal).await
     } else {

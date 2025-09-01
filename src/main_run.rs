@@ -22,7 +22,7 @@ pub async fn run(config: GlobalConfig, cli: Cli, text: Option<String>) -> Result
     let abort_signal = create_abort_signal();
 
     if cli.sync_models {
-        let url = config.read().sync_models_url();
+        let url = config.read().sync_models_url.clone();
         return Config::sync_models(&url, abort_signal.clone()).await;
     }
 
