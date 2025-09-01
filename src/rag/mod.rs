@@ -531,7 +531,7 @@ impl Rag {
             Some(model_id) => {
                 let model =
                     Model::retrieve_model(&self.config.read(), model_id, ModelType::Reranker)?;
-                let client = init_client(&self.config, Some(model))?;
+                let client = init_client(&self.config, Some(model), None)?;
                 let ids: IndexSet<DocumentId> = [vector_search_ids, keyword_search_ids]
                     .concat()
                     .into_iter()
@@ -634,7 +634,7 @@ impl Rag {
         data: EmbeddingsData,
         spinner: Option<Spinner>,
     ) -> Result<EmbeddingsOutput> {
-        let embedding_client = init_client(&self.config, Some(self.embedding_model.clone()))?;
+        let embedding_client = init_client(&self.config, Some(self.embedding_model.clone()), None)?;
         let EmbeddingsData { texts, query } = data;
         let batch_size = self
             .data

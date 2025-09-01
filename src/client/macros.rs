@@ -5,7 +5,7 @@ macro_rules! register_client {
         $(($module:ident, $name:literal, $config:ident, $client:ident, [$($prompt:tt)*])),+
     ) => {
         $(
-            mod $module;
+            pub mod $module;
         )+
         $(
             use self::$module::$config;
@@ -34,7 +34,7 @@ macro_rules! register_client {
             impl $client {
                 pub const NAME: &'static str = $name;
 
-                pub const PROMPTS: [PromptAction<'static>; 0] = [$($prompt)*];
+                pub const PROMPTS: &[PromptAction<'static>] = &[ $($prompt)* ];
 
                 pub fn init(global_config: &$crate::config::GlobalConfig, model: &$crate::client::Model, authenticator: Option<std::sync::Arc<dyn Authenticator + Send + Sync>>) -> Option<Box<dyn Client>> {
                     let config = global_config.read().clients.iter().find_map(|client_config| {
@@ -95,7 +95,7 @@ macro_rules! register_client {
         pub async fn create_client_config(client: &str) -> anyhow::Result<(String, serde_json::Value)> {
             $(
                 if client == $client::NAME && client != $crate::client::OpenAICompatibleClient::NAME {
-                                           return create_config(&self.prompts(), $client::NAME).await
+                                           return create_config(&$client::PROMPTS, $client::NAME).await
                 }
             )+
             if let Some(ret) = create_openai_compatible_client_config(client).await? {
@@ -234,7 +234,7 @@ macro_rules! impl_client_trait {
 #[macro_export]
 macro_rules! config_get_fn {
     ($field_name:ident, $fn_name:ident) => {
-        fn $fn_name(&self) -> anyhow::Result<String> {
+        pub fn $fn_name(&self) -> anyhow::Result<String> {
             let env_prefix = Self::name(&self.config);
             let env_name =
                 format!("{}_{}", env_prefix, stringify!($field_name)).to_ascii_uppercase();

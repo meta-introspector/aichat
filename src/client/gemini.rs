@@ -1,4 +1,4 @@
-use super::vertexai::*;
+use crate::client::vertexai::*;
 use super::*;
 
 use anyhow::{Context, Result};
@@ -37,7 +37,15 @@ impl GeminiClient {
         Self { model, config, authenticator }
     }
 
-    config_get_fn!(api_base, get_api_base);
+    pub fn get_api_base(&self) -> anyhow::Result<String> {
+        let env_prefix = Self::name(&self.config);
+        let env_name =
+            format!("{}_{}", env_prefix, stringify!(api_base)).to_ascii_uppercase();
+        std::env::var(&env_name)
+            .ok()
+            .or_else(|| self.config.api_base.clone())
+            .ok_or_else(|| anyhow::anyhow!("Miss '{}'", stringify!(api_base)))
+    }
 
     
 }

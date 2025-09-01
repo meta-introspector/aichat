@@ -219,12 +219,12 @@ impl Input {
         self
     }
 
-    pub fn create_client(&self) -> Result<Box<dyn Client>> {
-        init_client(&self.config, Some(self.role().model().clone()))
+    pub async fn create_client(&self) -> Result<Box<dyn Client>> {
+        init_client(&self.config, Some(self.role().model().clone()), None)
     }
 
     pub async fn fetch_chat_text(&self) -> Result<String> {
-        let client = self.create_client()?;
+        let client = self.create_client().await?;
         let text = client.chat_completions(self.clone()).await?.text;
         let text = strip_think_tag(&text).to_string();
         Ok(text)

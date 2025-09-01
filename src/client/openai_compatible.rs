@@ -67,7 +67,7 @@ pub fn prepare_rerank(self_: &OpenAICompatibleClient, data: &RerankData) -> Resu
     let api_key = self_.get_api_key().ok();
     let api_base = get_api_base_ext(self_)?;
 
-    let url = if Self::name(&self_.config).starts_with("ernie") {
+    let url = if self_.name().starts_with("ernie") {
         format!("{api_base}/rerankers")
     } else {
         format!("{api_base}/rerank")

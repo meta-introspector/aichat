@@ -478,7 +478,7 @@ pub async fn call_chat_completions_streaming(
     }
 }
 
-pub fn noop_prepare_embeddings<T>(_client: &T, _data: &EmbeddingsData) -> Result<RequestData> {
+pub async fn noop_prepare_embeddings<T>(_client: &T, _data: &EmbeddingsData) -> Result<RequestData> {
     bail!("The client doesn't support embeddings api")
 }
 

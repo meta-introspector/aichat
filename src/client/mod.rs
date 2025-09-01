@@ -30,6 +30,7 @@ register_client!(
         ("api_key", "API Key", None)
     ]),
     (bedrock, "bedrock", BedrockConfig, BedrockClient, []),
+    (vertexai, "vertexai", VertexAIConfig, VertexAIClient, [("project_id", "Project ID", None), ("location", "Location", None)])
 );
 
 impl_client_trait!(
@@ -95,6 +96,17 @@ impl_client_trait!(
         openai::openai_chat_completions_streaming
     ),
     (azure_openai::prepare_embeddings, openai::openai_embeddings),
+    (noop_prepare_rerank, noop_rerank),
+);
+
+impl_client_trait!(
+    VertexAIClient,
+    (
+        vertexai::prepare_chat_completions,
+        vertexai::gemini_chat_completions,
+        vertexai::gemini_chat_completions_streaming
+    ),
+    (vertexai::prepare_embeddings, vertexai::embeddings),
     (noop_prepare_rerank, noop_rerank),
 );
 

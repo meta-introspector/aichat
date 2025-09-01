@@ -83,8 +83,7 @@ pub async fn claude_chat_completions_streaming(
                         if !function_name.is_empty() {
                             let arguments: Value = function_arguments.parse().with_context(|| {
                                 format!("Tool call '{function_name}' have non-JSON arguments '{function_arguments}'")
-                            })?;
-                            handler.tool_call(ToolCall::new(
+                            })?;                            handler.tool_call(ToolCall::new(
                                 function_name.clone(),
                                 arguments,
                                 Some(function_id.clone()),
@@ -122,8 +121,7 @@ pub async fn claude_chat_completions_streaming(
                         } else {
                             function_arguments.parse().with_context(|| {
                                 format!("Tool call '{function_name}' have non-JSON arguments '{function_arguments}'")
-                            })?;
-                        };
+                            })?                        };
                         handler.tool_call(ToolCall::new(
                             function_name.clone(),
                             arguments,

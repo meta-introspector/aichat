@@ -2,6 +2,7 @@ use super::access_token::*;
 use super::claude::*;
 use super::openai::*;
 use super::*;
+use crate::config_get_fn;
 
 use anyhow::{anyhow, bail, Context, Result};
 use chrono::{Duration, Utc};
@@ -23,77 +24,34 @@ pub struct VertexAIConfig {
 }
 
 impl VertexAIClient {
-    config_get_fn!(project_id, get_project_id);
-    config_get_fn!(location, get_location);
-
-    pub const PROMPTS: [PromptAction<'static>; 2] = [
-        ("project_id", "Project ID", None),
-        ("location", "Location", None),
-    ];
-}
-
-#[async_trait::async_trait]
-impl Client for VertexAIClient {
-    client_common_fns!();
-
-    async fn chat_completions_inner(
-        &self,
-        client: &ReqwestClient,
-        data: ChatCompletionsData,
-    ) -> Result<ChatCompletionsOutput> {
-        prepare_gcloud_access_token(client, self.name(), &self.config.adc_file).await?;
-        let model = self.model();
-        let model_category = ModelCategory::from_str(model.real_name())?;
-        let request_data = prepare_chat_completions(self, data, &model_category)?;
-        let builder = self.request_builder(client, request_data);
-        match model_category {
-            ModelCategory::Gemini => gemini_chat_completions(builder, model).await,
-            ModelCategory::Claude => claude_chat_completions(builder, model).await,
-            ModelCategory::Mistral => openai_chat_completions(builder, model).await,
-        }
+    pub fn get_project_id(&self) -> anyhow::Result<String> {
+        let env_prefix = Self::name(&self.config);
+        let env_name =
+            format!("{}_{}", env_prefix, stringify!(project_id)).to_ascii_uppercase();
+        std::env::var(&env_name)
+            .ok()
+            .or_else(|| self.config.project_id.clone())
+            .ok_or_else(|| anyhow::anyhow!("Miss '{}'", stringify!(project_id)))
     }
 
-    async fn chat_completions_streaming_inner(
-        &self,
-        client: &ReqwestClient,
-        handler: &mut SseHandler,
-        data: ChatCompletionsData,
-    ) -> Result<()> {
-        prepare_gcloud_access_token(client, self.name(), &self.config.adc_file).await?;
-        let model = self.model();
-        let model_category = ModelCategory::from_str(model.real_name())?;
-        let request_data = prepare_chat_completions(self, data, &model_category)?;
-        let builder = self.request_builder(client, request_data);
-        match model_category {
-            ModelCategory::Gemini => {
-                gemini_chat_completions_streaming(builder, handler, model).await
-            }
-            ModelCategory::Claude => {
-                claude_chat_completions_streaming(builder, handler, model).await
-            }
-            ModelCategory::Mistral => {
-                openai_chat_completions_streaming(builder, handler, model).await
-            }
-        }
-    }
-
-    async fn embeddings_inner(
-        &self,
-        client: &ReqwestClient,
-        data: &EmbeddingsData,
-    ) -> Result<Vec<Vec<f32>>> {
-        prepare_gcloud_access_token(client, self.name(), &self.config.adc_file).await?;
-        let request_data = prepare_embeddings(self, data)?;
-        let builder = self.request_builder(client, request_data);
-        embeddings(builder, self.model()).await
+    pub fn get_location(&self) -> anyhow::Result<String> {
+        let env_prefix = Self::name(&self.config);
+        let env_name =
+            format!("{}_{}", env_prefix, stringify!(location)).to_ascii_uppercase();
+        std::env::var(&env_name)
+            .ok()
+            .or_else(|| self.config.location.clone())
+            .ok_or_else(|| anyhow::anyhow!("Miss '{}'", stringify!(location)))
     }
 }
 
-fn prepare_chat_completions(
+
+
+pub async fn prepare_chat_completions(
     self_: &crate::client::VertexAIClient,
     data: ChatCompletionsData,
-    model_category: &ModelCategory,
 ) -> Result<RequestData> {
+    let model_category = ModelCategory::from_str(self_.model().real_name())?;
     let project_id = self_.get_project_id()?;
     let location = self_.get_location()?;
     let access_token = get_access_token(self_.name())?;
@@ -152,33 +110,7 @@ fn prepare_chat_completions(
     Ok(request_data)
 }
 
-fn prepare_embeddings(self_: &crate::client::VertexAIClient, data: &EmbeddingsData) -> Result<RequestData> {
-    let project_id = self_.get_project_id()?;
-    let location = self_.get_location()?;
-    let access_token = get_access_token(self_.name())?;
 
-    let base_url = if location == "global" {
-        format!("https://aiplatform.googleapis.com/v1/projects/{project_id}/locations/global/publishers")
-    } else {
-        format!("https://{location}-aiplatform.googleapis.com/v1/projects/{project_id}/locations/{location}/publishers")
-    };
-    let url = format!(
-        "{base_url}/google/models/{}:predict",
-        self_.model.real_name()
-    );
-
-    let instances: Vec<_> = data.texts.iter().map(|v| json!({"content": v})).collect();
-
-    let body = json!({
-        "instances": instances,
-    });
-
-    let mut request_data = RequestData::new(url, body);
-
-    request_data.bearer_auth(access_token);
-
-    Ok(request_data)
-}
 
 pub async fn gemini_chat_completions(
     builder: RequestBuilder,
@@ -236,7 +168,7 @@ pub async fn gemini_chat_completions_streaming(
     Ok(())
 }
 
-async fn embeddings(builder: RequestBuilder, _model: &Model) -> Result<EmbeddingsOutput> {
+pub async fn embeddings(builder: RequestBuilder, _model: &Model) -> Result<EmbeddingsOutput> {
     let res = builder.send().await?;
     let status = res.status();
     let data: Value = res.json().await?;

@@ -62,7 +62,7 @@ async fn main() -> Result<()> {
     if let Some(command) = cli.command {
         match command {
             cli::Commands::Auth(auth_command) => {
-                handle_auth_command(auth_command).await?;
+                handle_auth_command(auth_command.command).await?;
             }
         }
         return Ok(());

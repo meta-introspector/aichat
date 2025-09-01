@@ -733,7 +733,7 @@ async fn ask(
         tokio::time::sleep(std::time::Duration::from_millis(100)).await;
     }
 
-    let client = input.create_client()?;
+    let client = input.create_client().await?;
     config.write().before_chat_completion(&input)?;
     let (output, tool_results) = if input.stream() {
         call_chat_completions_streaming(&input, client.as_ref(), abort_signal.clone()).await?
