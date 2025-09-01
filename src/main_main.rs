@@ -1,15 +1,16 @@
 use crate::cli::Cli;
-use crate::config::{Config, GlobalConfig, load_env_file};
+use crate::config::{Config, GlobalConfig};
 use crate::render::render_error;
 use anyhow::Result;
 use clap::Parser;
 use std::sync::Arc;
 use parking_lot::RwLock;
-use crate::WorkingMode;
+use crate::config::WorkingMode;
+use crate::cli;
 
 #[tokio::main]
 pub async fn main() -> Result<()> {
-    load_env_file()?;
+    // load_env_file()?;
     let cli = Cli::parse();
     let text = cli.text()?;
     let working_mode = if cli.serve.is_some() {

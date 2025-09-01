@@ -1,11 +1,11 @@
 use anyhow::{bail, Result};
 use async_recursion::async_recursion;
 use inquire::Text;
-use simplelog::debug;
+
 
 use crate::client::{call_chat_completions, call_chat_completions_streaming};
 use crate::config::{GlobalConfig, Input, EXPLAIN_SHELL_ROLE};
-use crate::utils::{AbortSignal, append_to_shell_history, color_text, dimmed_text, read_single_key, run_command, set_text, IS_STDOUT_TERMINAL, SHELL};
+use crate::utils::{AbortSignal, append_to_shell_history, color_text, dimmed_text, read_single_key, run_command, set_text, IS_STDOUT_TERMINAL, Shell};
 use std::process;
 
 #[async_recursion::async_recursion]
@@ -27,7 +27,7 @@ pub async fn shell_execute(
         bail!("No command generated");
     }
     if config.read().dry_run {
-        config.read().print_markdown(&eval_str)?;
+        println!("{}", &eval_str);
         return Ok(());
     }
     if *IS_STDOUT_TERMINAL {
@@ -76,7 +76,7 @@ pub async fn shell_execute(
                             false,
                             client.as_ref(),
                             abort_signal.clone(),
-                        )?;
+                        ).await?;
                     }
                     println!();
                     continue;
@@ -85,7 +85,7 @@ pub async fn shell_execute(
                     set_text(&eval_str)?;
                     println!("{}", dimmed_text("✓ Copied the command."));
                 }
-                _ => {} \
+                _ => {}
             }
             break;
         }

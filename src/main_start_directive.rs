@@ -3,7 +3,7 @@ use async_recursion::async_recursion;
 
 use crate::client::{call_chat_completions, call_chat_completions_streaming};
 use crate::config::{GlobalConfig, Input};
-use crate::utils::AbortSignal;
+use crate::utils::{AbortSignal, IS_STDOUT_TERMINAL};
 
 #[async_recursion::async_recursion]
 pub async fn start_directive(
@@ -12,7 +12,7 @@ pub async fn start_directive(
     code_mode: bool,
     abort_signal: AbortSignal,
 ) -> Result<()> {
-    let client = input.create_client().await?;;
+    let client = input.create_client().await?;
     let extract_code = !*IS_STDOUT_TERMINAL && code_mode;
     config.write().before_chat_completion(&input)?;
     let (output, tool_results) = if !input.stream() || extract_code {

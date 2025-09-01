@@ -1,3 +1,4 @@
+use oauth2::TokenResponse;
 use anyhow::{bail, Result};
 use clap::Parser;
 use inquire::Text;
@@ -6,7 +7,7 @@ use simplelog::{format_description, ConfigBuilder, LevelFilter, SimpleLogger, Wr
 use std::{env, process, sync::Arc};
 
 use crate::cli;
-use crate::config::{Config, GlobalConfig, load_env_file, macro_execute, WorkingMode, CODE_ROLE, EXPLAIN_SHELL_ROLE, SHELL_ROLE, TEMP_SESSION_NAME};
+use crate::config::{Config, GlobalConfig, WorkingMode, CODE_ROLE, EXPLAIN_SHELL_ROLE, SHELL_ROLE, TEMP_SESSION_NAME};
 use crate::render::render_error;
 use crate::repl::Repl;
 use crate::utils::*;
@@ -16,7 +17,7 @@ use crate::auth::oauth_split::oauth_config::OAuthConfig;
 use crate::auth::credential_store::CredentialStore;
 use crate::auth::oauth_split::constants;
 
-async fn handle_manage_google_oauth_command(config: GlobalConfig) -> Result<()> {
+pub async fn handle_manage_google_oauth_command(config: GlobalConfig) -> Result<()> {
     println!("Initializing Google Cloud OAuth management client...");
 
     // Define the scopes needed for the meta client

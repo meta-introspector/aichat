@@ -249,7 +249,7 @@ impl Server {
         let rag_path = config.read().rag_file(&name);
         let rag = Rag::load(&config, &name, &rag_path)?;
 
-        let rag_result = Config::search_rag(&config, &rag, &input, abort_signal).await?;
+        // let rag_result = Config::search_rag(&config, &rag, &input, abort_signal).await?;
 
         let data = json!({ "data": rag_result });
         let res = Response::builder()

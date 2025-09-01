@@ -3,7 +3,8 @@ use simplelog::{format_description, ConfigBuilder, LevelFilter, SimpleLogger, Wr
 use std::{env, fs::{File, create_dir_all}, path::PathBuf};
 
 use crate::config::Config;
-use crate::utils::{get_env_name, ensure_parent_exists};
+use crate::utils::get_env_name;
+use crate::utils::ensure_parent_exists;
 
 pub fn setup_logger(is_serve: bool) -> Result<()> {
     let (log_level, log_path) = Config::log_config(is_serve)?;

@@ -24,13 +24,13 @@ pub use self::request::*;
 pub use self::spinner::*;
 pub use self::variables::*;
 
-use anyhow::{Context, Result};
+use anyhow::{anyhow, Context, Result};
 use fancy_regex::Regex;
 use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
 use is_terminal::IsTerminal;
 use std::borrow::Cow;
 use std::sync::LazyLock;
-use std::{env, path::PathBuf, process};
+use std::{env, path::{Path, PathBuf}, process};
 use unicode_segmentation::UnicodeSegmentation;
 
 pub static CODE_BLOCK_RE: LazyLock<Regex> =
@@ -193,10 +193,12 @@ pub fn multiline_text(input: &str) -> String {
 
 pub fn temp_file(prefix: &str, suffix: &str) -> PathBuf {
     env::temp_dir().join(format!(
-        "{}-{}{prefix}{}{suffix}",
+        "{}-{}{}{}{}",
         env!("CARGO_CRATE_NAME").to_lowercase(),
         process::id(),
-        uuid::Uuid::new_v4()
+        prefix,
+        uuid::Uuid::new_v4(),
+        suffix
     ))
 }
 
@@ -210,8 +212,8 @@ pub fn set_proxy(
 ) -> Result<reqwest::ClientBuilder> {
     builder = builder.no_proxy();
     if !proxy.is_empty() && proxy != "-" {
-        builder = builder
-            .proxy(reqwest::Proxy::all(proxy).with_context(|| format!("Invalid proxy `{proxy}`"))?);
+        let proxy_instance = reqwest::Proxy::all(proxy).with_context(|| format!("Invalid proxy `{proxy}`"))?;
+        builder = builder.proxy(proxy_instance);
     };
     Ok(builder)
 }
@@ -219,6 +221,22 @@ pub fn set_proxy(
 pub fn decode_bin<T: serde::de::DeserializeOwned>(data: &[u8]) -> Result<T> {
     let (v, _) = bincode::serde::decode_from_slice(data, bincode::config::legacy())?;
     Ok(v)
+}
+
+pub fn ensure_parent_exists(path: &Path) -> Result<()> {
+    if path.exists() {
+        return Ok(());
+    }
+    let parent = path
+        .parent()
+        .ok_or_else(|| anyhow!("Failed to write to '{}', No parent path", path.display()))?;
+    if !parent.exists() {
+        std::fs::create_dir_all(parent).context(format!(
+            "Failed to create parent directory '{}'",
+            parent.display()
+        ))?;
+    }
+    Ok(())
 }
 
 #[cfg(test)]

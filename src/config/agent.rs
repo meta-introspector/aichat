@@ -404,24 +404,24 @@ impl AgentConfig {
     fn load_envs(&mut self, name: &str) {
         let with_prefix = |v: &str| normalize_env_name(&format!("{name}_{v}"));
 
-        if let Some(v) = read_env_value::<String>(&with_prefix("model")) {
-            self.model_id = v;
-        }
-        if let Some(v) = read_env_value::<f64>(&with_prefix("temperature")) {
-            self.temperature = v;
-        }
-        if let Some(v) = read_env_value::<f64>(&with_prefix("top_p")) {
-            self.top_p = v;
-        }
-        if let Some(v) = read_env_value::<String>(&with_prefix("use_tools")) {
-            self.use_tools = v;
-        }
-        if let Some(v) = read_env_value::<String>(&with_prefix("agent_prelude")) {
-            self.agent_prelude = v;
-        }
-        if let Some(v) = read_env_value::<String>(&with_prefix("instructions")) {
-            self.instructions = v;
-        }
+        // if let Some(v) = read_env_value::<String>(&with_prefix("model")) {
+        //     self.model_id = v;
+        // }
+        // if let Some(v) = read_env_value::<f64>(&with_prefix("temperature")) {
+        //     self.temperature = v;
+        // }
+        // if let Some(v) = read_env_value::<f64>(&with_prefix("top_p")) {
+        //     self.top_p = v;
+        // }
+        // if let Some(v) = read_env_value::<String>(&with_prefix("use_tools")) {
+        //     self.use_tools = v;
+        // }
+        // if let Some(v) = read_env_value::<String>(&with_prefix("agent_prelude")) {
+        //     self.agent_prelude = v;
+        // }
+        // if let Some(v) = read_env_value::<String>(&with_prefix("instructions")) {
+        //     self.instructions = v;
+        // }
         if let Ok(v) = env::var(with_prefix("variables")) {
             if let Ok(v) = serde_json::from_str(&v) {
                 self.variables = v;

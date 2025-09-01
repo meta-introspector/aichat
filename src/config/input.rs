@@ -15,7 +15,7 @@ use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
 const IMAGE_EXTS: [&str; 5] = ["png", "jpeg", "jpg", "webp", "gif"];
 const SUMMARY_MAX_WIDTH: usize = 80;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct Input {
     config: GlobalConfig,
     text: String,
@@ -198,7 +198,7 @@ impl Input {
         }
         let rag = self.config.read().rag.clone();
         if let Some(rag) = rag {
-            let result = Config::search_rag(&self.config, &rag, &self.text, abort_signal).await?;
+            // let result = Config::search_rag(&self.config, &rag, &self.text, abort_signal).await?;
             self.patched_text = Some(result);
             self.rag_name = Some(rag.name().to_string());
         }

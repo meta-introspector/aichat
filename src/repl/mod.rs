@@ -7,10 +7,7 @@ use self::highlighter::ReplHighlighter;
 use self::prompt::ReplPrompt;
 
 use crate::client::{call_chat_completions, call_chat_completions_streaming};
-use crate::config::{
-    macro_execute, AgentVariables, AssertState, Config, GlobalConfig, Input, LastMessage,
-    StateFlags,
-};
+use crate::config::{AgentVariables, AssertState, Config, GlobalConfig, Input, LastMessage, StateFlags,};
 use crate::render::render_error;
 use crate::utils::{
     abortable_run_with_spinner, create_abort_signal, dimmed_text, set_text, temp_file, AbortSignal,
@@ -501,7 +498,7 @@ pub async fn run_repl_command(
                 }
                 None => {
                     let banner = config.read().agent_banner()?;
-                    config.read().print_markdown(&banner)?;
+                    println!("{}", &banner);
                 }
             },
             ".save" => match split_first_arg(args) {
@@ -584,7 +581,7 @@ pub async fn run_repl_command(
                     if !Config::has_macro(name) && extra.is_none() {
                         config.write().new_macro(name)?;
                     } else {
-                        macro_execute(config, name, extra, abort_signal.clone()).await?;
+                        // macro_execute(config, name, extra, abort_signal.clone()).await?;
                     }
                 }
                 None => println!("Usage: .macro <name> <text>..."),

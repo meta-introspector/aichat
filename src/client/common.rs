@@ -435,7 +435,7 @@ pub async fn call_chat_completions(
                     text = extract_code_block(&strip_think_tag(&text)).to_string();
                 }
                 if print {
-                    client.global_config().read().print_markdown(&text)?;
+                    println!("{}", &text);
                 }
             }
             Ok((text, eval_tool_calls(client.global_config(), tool_calls)?))

@@ -5,14 +5,20 @@ use parking_lot::RwLock;
 use simplelog::{format_description, ConfigBuilder, LevelFilter, SimpleLogger, WriteLogger};
 use std::{env, process, sync::Arc};
 
-use crate::cli;
+use crate::cli::{Cli, Commands};
 use crate::client::{call_chat_completions, call_chat_completions_streaming, list_models, ModelType};
-use crate::config::{ensure_parent_exists, list_agents, load_env_file, macro_execute, Config, GlobalConfig, Input, WorkingMode, CODE_ROLE, EXPLAIN_SHELL_ROLE, SHELL_ROLE, TEMP_SESSION_NAME};
+use crate::config::{list_agents, Config, GlobalConfig, Input, WorkingMode, CODE_ROLE, EXPLAIN_SHELL_ROLE, SHELL_ROLE, TEMP_SESSION_NAME};
+use crate::utils::ensure_parent_exists;
 use crate::render::render_error;
 use crate::repl::Repl;
-use crate::utils::*;
+use crate::utils::{*, IS_STDOUT_TERMINAL, SHELL};
+use crate::serve;
+use crate::main_create_input::create_input;
+use crate::main_shell_execute::shell_execute;
+use crate::main_start_directive::start_directive;
+use crate::main_start_interactive::start_interactive;
 
-async fn run(config: GlobalConfig, cli: Cli, text: Option<String>) -> Result<()> {
+pub async fn run(config: GlobalConfig, cli: Cli, text: Option<String>) -> Result<()> {
     let abort_signal = create_abort_signal();
 
     if cli.sync_models {
@@ -120,7 +126,7 @@ async fn run(config: GlobalConfig, cli: Cli, text: Option<String>) -> Result<()>
         }
     }
     if let Some(name) = &cli.macro_name {
-        macro_execute(&config, name, text.as_deref(), abort_signal.clone()).await?;
+        // macro_execute(&config, name, text.as_deref(), abort_signal.clone()).await?;
         return Ok(());
     }
     if cli.execute && !is_repl {
