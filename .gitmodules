@@ -1,3 +1,18 @@
 [submodule "oauth_review/r-google-oauth2"]
 	path = oauth_review/r-google-oauth2
 	url = https://github.com/mass10/r-google-oauth2/
+[submodule "oauth_review/rs-gapi-oauth"]
+	path = oauth_review/rs-gapi-oauth
+	url = https://github.com/mass10/rs-gapi-oauth
+[submodule "vendor/gcloud-sdk-rs"]
+	path = vendor/gcloud-sdk-rs
+	url = https://github.com/abdolence/gcloud-sdk-rs
+[submodule "vendor/google-apis/google-cloud-rust"]
+	path = vendor/google-apis/google-cloud-rust
+	url = https://github.com/googleapis/google-cloud-rust
+[submodule "vendor/google-apis/google-api-rust-client"]
+	path = vendor/google-apis/google-api-rust-client
+	url = https://github.com/0Itsuki0/google-api-rust-client
+[submodule "vendor/google-apis/google-apis-rs"]
+	path = vendor/google-apis/google-apis-rs
+	url = https://github.com/Byron/google-apis-rs
