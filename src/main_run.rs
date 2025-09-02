@@ -1,16 +1,8 @@
 use anyhow::{bail, Result};
-use clap::Parser;
-use inquire::Text;
-use parking_lot::RwLock;
-use simplelog::{format_description, ConfigBuilder, LevelFilter, SimpleLogger, WriteLogger};
-use std::{env, process, sync::Arc};
 
-use crate::cli::{Cli, Commands};
-use crate::client::{call_chat_completions, call_chat_completions_streaming, list_models, ModelType};
-use crate::config::{list_agents, Config, GlobalConfig, Input, WorkingMode, CODE_ROLE, EXPLAIN_SHELL_ROLE, SHELL_ROLE, TEMP_SESSION_NAME};
-use crate::utils::ensure_parent_exists;
-use crate::render::render_error;
-use crate::repl::Repl;
+use crate::cli::Cli;
+use crate::client::{list_models, ModelType};
+use crate::config::{list_agents, Config, GlobalConfig, CODE_ROLE, SHELL_ROLE, TEMP_SESSION_NAME};
 use crate::utils::{*, IS_STDOUT_TERMINAL, SHELL};
 use crate::serve;
 use crate::main_create_input::create_input;

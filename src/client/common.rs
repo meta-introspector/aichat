@@ -1,8 +1,8 @@
 use super::*;
 
 use crate::{
-    config::{Config, GlobalConfig, Input},
-    function::{eval_tool_calls, FunctionDeclaration, ToolCall, ToolResult},
+    config::{GlobalConfig, Input},
+    function::{eval_tool_calls, ToolCall, ToolResult},
     render::render_stream,
     utils::*,
 };

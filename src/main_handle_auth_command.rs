@@ -1,20 +1,12 @@
-use anyhow::{bail, Context, Result};
-use clap::Parser;
-use inquire::Text;
-use parking_lot::RwLock;
-use simplelog::{format_description, ConfigBuilder, LevelFilter, SimpleLogger, WriteLogger};
-use std::{env, fs, process, sync::Arc};
+use anyhow::{Context, Result};
+use std::{fs, sync::Arc};
 
 use crate::cli;
-use crate::config::{Config, GlobalConfig, WorkingMode, CODE_ROLE, EXPLAIN_SHELL_ROLE, SHELL_ROLE, TEMP_SESSION_NAME};
-use crate::render::render_error;
-use crate::repl::Repl;
-use crate::utils::*;
-use crate::auth::{Authenticator, ApiKeyAuthenticator};
+use crate::config::{Config, GlobalConfig};
+use crate::auth::Authenticator;
 use crate::auth::oauth_split::oauth_authenticator_struct::OAuthAuthenticator;
 use crate::auth::oauth_split::oauth_config::OAuthConfig;
 use crate::auth::credential_store::CredentialStore;
-use crate::auth::oauth_split::constants;
 
 pub async fn handle_auth_command(command: cli::AuthSubcommands, config: GlobalConfig) -> Result<()> {
     match command {

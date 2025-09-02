@@ -1,5 +1,5 @@
-use anyhow::{Result, Context};
-use chrono::{Utc, Duration};
+use anyhow::Result;
+use chrono::Utc;
 
 use oauth2::RefreshToken;
 
@@ -12,7 +12,7 @@ use async_trait::async_trait;
 impl Authenticator for OAuthAuthenticator {
     async fn authenticate(&self) -> Result<String> {
         // 1. Try to load cached credentials
-        if let Ok(mut creds) = self.credential_store.read_credentials() {
+        if let Ok(creds) = self.credential_store.read_credentials() {
             // Check if expired and refresh
             if let Some(expiry) = creds.expiry_date {
                 if Utc::now().timestamp() >= expiry {
@@ -35,7 +35,7 @@ impl Authenticator for OAuthAuthenticator {
         use crate::auth::oauth_split::web_auth_flow;
         use crate::auth::oauth_split::web_flow_token_exchange;
         use crate::auth::oauth_split::constants::OAUTH_SCOPE;
-        use oauth2::{CsrfToken, RedirectUrl, Scope, TokenResponse, AuthUrl, TokenUrl};
+        use oauth2::{CsrfToken, RedirectUrl, Scope, TokenResponse};
         use std::borrow::Cow;
 
         let (client, pkce_code_challenge, pkce_code_verifier) =

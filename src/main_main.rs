@@ -1,5 +1,5 @@
 use crate::cli::Cli;
-use crate::config::{Config, GlobalConfig};
+use crate::config::Config;
 use crate::render::render_error;
 use anyhow::Result;
 use clap::Parser;

@@ -1,4 +1,4 @@
-use crate::{client::*, config::*, function::*, rag::*, utils::*};
+use crate::{client::*, config::*, function::*, utils::*};
 
 use anyhow::{anyhow, bail, Result};
 use bytes::Bytes;

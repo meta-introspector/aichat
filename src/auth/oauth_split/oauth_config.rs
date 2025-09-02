@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 
 // Placeholder for OAuth configuration
 #[derive(Debug, Clone, Deserialize, Default)]

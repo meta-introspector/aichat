@@ -1,5 +1,4 @@
 use anyhow::Result;
-use async_recursion::async_recursion;
 
 use crate::client::{call_chat_completions, call_chat_completions_streaming};
 use crate::config::{GlobalConfig, Input};

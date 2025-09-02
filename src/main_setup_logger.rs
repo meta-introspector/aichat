@@ -1,6 +1,6 @@
 use anyhow::Result;
 use simplelog::{format_description, ConfigBuilder, LevelFilter, SimpleLogger, WriteLogger};
-use std::{env, fs::{File, create_dir_all}, path::PathBuf};
+use std::{env, fs::File};
 
 use crate::config::Config;
 use crate::utils::get_env_name;

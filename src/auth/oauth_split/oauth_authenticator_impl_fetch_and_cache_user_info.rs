@@ -1,7 +1,6 @@
-use anyhow::{Result, Context};
+use anyhow::Result;
 
 use crate::auth::oauth_split::user_info::UserInfo;
-use crate::auth::credential_store::CredentialStore;
 use crate::auth::oauth_split::oauth_authenticator_struct::OAuthAuthenticator;
 
 impl OAuthAuthenticator {

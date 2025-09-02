@@ -4,7 +4,7 @@ mod stream;
 pub use self::markdown::{MarkdownRender, RenderOptions};
 use self::stream::{markdown_stream, raw_stream};
 
-use crate::utils::{create_abort_signal, dimmed_text, set_text, temp_file, AbortSignal, IS_STDOUT_TERMINAL, error_text, pretty_error};
+use crate::utils::{AbortSignal, IS_STDOUT_TERMINAL, error_text, pretty_error};
 use std::ops::Deref;
 use crate::{client::SseEvent, config::GlobalConfig};
 

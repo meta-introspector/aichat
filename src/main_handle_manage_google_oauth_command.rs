@@ -1,21 +1,7 @@
 use oauth2::TokenResponse;
-use anyhow::{bail, Result};
-use clap::Parser;
-use inquire::Text;
-use parking_lot::RwLock;
-use simplelog::{format_description, ConfigBuilder, LevelFilter, SimpleLogger, WriteLogger};
-use std::{env, process, sync::Arc};
+use anyhow::Result;
 
-use crate::cli;
-use crate::config::{Config, GlobalConfig, WorkingMode, CODE_ROLE, EXPLAIN_SHELL_ROLE, SHELL_ROLE, TEMP_SESSION_NAME};
-use crate::render::render_error;
-use crate::repl::Repl;
-use crate::utils::*;
-use crate::auth::{Authenticator, ApiKeyAuthenticator};
-use crate::auth::oauth_split::oauth_authenticator_struct::OAuthAuthenticator;
-use crate::auth::oauth_split::oauth_config::OAuthConfig;
-use crate::auth::credential_store::CredentialStore;
-use crate::auth::oauth_split::constants;
+use crate::config::GlobalConfig;
 
 pub async fn handle_manage_google_oauth_command(config: GlobalConfig) -> Result<()> {
     println!("Initializing Google Cloud OAuth management client...");

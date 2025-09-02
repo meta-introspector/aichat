@@ -249,7 +249,6 @@ macro_rules! impl_client_trait {
 ///
 /// * `$field_name` - The name of the field in the client's configuration struct (e.g., `api_base`).
 /// * `$fn_name` - The desired name of the generated getter function (e.g., `get_api_base`).
-#[macro_export]
 macro_rules! config_get_fn {
     ($field_name:ident, $fn_name:ident) => {
         pub fn $fn_name(&self) -> anyhow::Result<String> {

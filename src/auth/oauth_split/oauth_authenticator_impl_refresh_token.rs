@@ -1,5 +1,5 @@
 use anyhow::{Result, Context};
-use chrono::{Utc, Duration};
+use chrono::Utc;
 
 use oauth2::basic::BasicClient;
 
@@ -7,7 +7,6 @@ use oauth2::{ClientId, ClientSecret, AuthUrl, TokenUrl, RefreshToken, TokenRespo
 use reqwest;
 
 use crate::auth::credential_store::{Credentials};
-use crate::auth::oauth_split::oauth_config::OAuthConfig;
 use crate::auth::oauth_split::oauth_authenticator_struct::OAuthAuthenticator;
 
 impl OAuthAuthenticator {

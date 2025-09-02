@@ -19,7 +19,6 @@ pub use self::html_to_md::*;
 pub use self::input::*;
 pub use self::loader::*;
 pub use self::path::*;
-pub use self::render_prompt::render_prompt;
 pub use self::request::*;
 pub use self::spinner::*;
 pub use self::variables::*;

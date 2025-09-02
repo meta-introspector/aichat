@@ -4,7 +4,7 @@ mod role;
 mod session;
 mod types;
 
-pub use self::agent::{complete_agent_variables, list_agents, Agent, AgentVariables};
+pub use self::agent::{list_agents, Agent, AgentVariables};
 pub use self::input::Input;
 pub use self::role::{
     Role, RoleLike, CODE_ROLE, CREATE_TITLE_ROLE, EXPLAIN_SHELL_ROLE, SHELL_ROLE,
@@ -13,41 +13,35 @@ pub use self::types::{WorkingMode, LastMessage, StateFlags, AssertState};
 use self::session::Session;
 
 use crate::client::{
-    create_client_config, list_client_types, list_models, ClientConfig, MessageContentToolCalls,
-    Model, ModelType, ProviderModels, OPENAI_COMPATIBLE_PROVIDERS,
+    ClientConfig,
+    Model, ModelType,
 };
-use crate::function::{FunctionDeclaration, Functions, ToolResult};
+use crate::function::{Functions, ToolResult};
 use crate::rag::Rag;
 use crate::render::{MarkdownRender, RenderOptions};
-use crate::repl::{run_repl_command, split_args_text};
 use crate::utils::*;
 
 use anyhow::{anyhow, bail, Context, Result};
 use indexmap::IndexMap;
-use inquire::{list_option::ListOption, validator::Validation, Confirm, MultiSelect, Select, Text};
+use inquire::{list_option::ListOption, validator::Validation, Confirm, MultiSelect, Text};
 use parking_lot::RwLock;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use serde_json::json;
 use simplelog::LevelFilter;
 use std::collections::{HashMap, HashSet};
 use std::{
     env,
     fs::{
-        create_dir_all,
         read_dir,
         read_to_string,
         remove_dir_all,
         remove_file,
-        File,
-        OpenOptions,
     },
     io::Write,
     path::{Path, PathBuf},
-    process,
     sync::{Arc, OnceLock},
 };
 use syntect::highlighting::ThemeSet;
-use terminal_colorsaurus::{color_scheme, ColorScheme, QueryOptions};
 use crate::auth::oauth_split::oauth_config::OAuthConfig;
 
 pub const TEMP_ROLE_NAME: &str = "%%";
@@ -1397,7 +1391,7 @@ impl Config {
     }
 
     pub async fn edit_rag_docs(config: &GlobalConfig, abort_signal: AbortSignal) -> Result<()> {
-        let mut rag = match config.read().rag.clone() {
+        let rag = match config.read().rag.clone() {
             Some(v) => v.as_ref().clone(),
             None => bail!("No RAG"),
         };

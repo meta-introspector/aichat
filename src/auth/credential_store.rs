@@ -1,8 +1,7 @@
 use anyhow::{Result, Context};
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 const GEMINI_DIR: &str = ".zos";
 const CREDENTIAL_FILENAME: &str = "oauth_creds.json";
