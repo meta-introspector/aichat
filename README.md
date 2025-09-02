@@ -174,6 +174,58 @@ For OAuth-based authentication, `aichat` now stores credentials in a `.zos` dire
 
 Internal macros and their documentation, such as `config_get_fn!`, can be found directly in the source code, for example, in `src/client/macros.rs`.
 
+### OAuth Scope Management and Policy Classes
+
+To enhance security and provide fine-grained control over OAuth permissions, AIChat now includes a dedicated scope management tool and supports policy-based access control.
+
+**Scope Management Tool (`aichat-scope-manager`)**
+
+This CLI tool simplifies the process of selecting and managing Google OAuth scopes. It reads a comprehensive list of available scopes from Google APIs and allows developers to interactively select the specific permissions required for their application.
+
+Usage:
+```bash
+cargo run --package aichat-scope-manager -- --help
+# To generate a policy:
+cargo run --package aichat-scope-manager -- --policy-name MyCustomPolicy
+```
+(Note: This tool requires an interactive terminal. When running, follow the prompts to select API groups and scopes.)
+
+**Policy Classes (`aichat-policies`)**
+
+The `aichat-scope-manager` can generate Rust policy classes within the `aichat-policies` crate. These classes are now represented as variants of a central `Policy` enum, providing a more declarative and type-safe way to define access control policies.
+
+Example of generated policy enum code:
+```rust
+// clients/aichat-policies/src/lib.rs (or generated_policies.rs)
+pub enum Policy {
+    MyCustomPolicy,
+    // ... other policy variants
+}
+
+impl Policy {
+    pub fn required_scopes(&self) -> Vec<&'static str> {
+        match self {
+            Policy::MyCustomPolicy => vec![
+                "https://www.googleapis.com/auth/cloud-platform",
+                "https://www.googleapis.com/auth/admin.directory.user",
+            ],
+            // ... other match arms
+        }
+    }
+
+    pub fn check_access(&self, granted_scopes: &[tlns_google_oauth2::scopes::Scopes]) -> bool {
+        self.required_scopes().iter().all(|req_scope| {
+            granted_scopes.iter().any(|granted_scope| granted_scope.to_google_scope() == *req_scope)
+        })
+    }
+}
+```
+
+These policy enum variants can then be used in your application's Access Control Logic (ACL) to verify if a user's granted OAuth scopes meet the requirements for specific operations or features. This approach promotes type-safety and maintainability in managing permissions.
+
+To integrate a generated policy, run the `aichat-scope-manager` with the `--policy-name` argument, and then copy the content of `clients/aichat-policies/src/generated_policies.rs` into `clients/aichat-policies/src/lib.rs`.
+
+
 ## License
 
 Copyright (c) 2023-2025 aichat-developers.

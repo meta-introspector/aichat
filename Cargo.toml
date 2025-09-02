@@ -1,6 +1,6 @@
 [workspace]
 members = [
-    ".", "clients/aichat-oauth-client", "clients/aichat-oauth-perms",
+    ".", "clients/aichat-oauth-client", "clients/aichat-oauth-perms", "clients/aichat-policies", "clients/aichat-scope-manager",
 ]
 
 [package]

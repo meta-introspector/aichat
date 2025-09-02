@@ -1,0 +1,7 @@
+[package]
+name = "aichat-policies"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tlns-google-oauth2 = { path = "../../vendor/google-apis/tlns-google-oauth2/tlns-google-oauth2" }
