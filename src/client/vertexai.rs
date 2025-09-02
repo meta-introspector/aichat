@@ -6,6 +6,7 @@ use reqwest::{Client as ReqwestClient, RequestBuilder};
 use serde::Deserialize;
 use serde_json::{json, Value};
 use std::{path :: PathBuf, str :: FromStr};
+use crate::client::FunctionInfo;
 
 #[derive(Debug, Clone, Deserialize, Default)]
 pub struct VertexAIConfig {
@@ -362,14 +363,16 @@ pub fn gemini_build_chat_completions_body(
         // Gemini doesn't support functions with parameters that have empty properties, so we need to patch it.
         let function_declarations: Vec<_> = functions
             .into_iter()
-            .map(|function| {
-                if function.parameters.is_empty_properties() {
+            .map(|v| {
+                let function_info: FunctionInfo = serde_json::from_value(v.clone()).unwrap_or_default(); // Deserialize to FunctionInfo
+                let is_empty_properties = function_info.parameters.as_ref().map_or(true, |p| p.is_object() && p.as_object().unwrap().is_empty());
+                if is_empty_properties {
                     json!({
-                        "name": function.name,
-                        "description": function.description,
+                        "name": function_info.name,
+                        "description": function_info.description,
                     })
                 } else {
-                    json!(function)
+                    json!(function_info) // Serialize FunctionInfo back to Value
                 }
             })
             .collect();

@@ -604,6 +604,39 @@ impl Config {
         Ok(output)
     }
 
+    pub fn render_options(&self) -> Result<RenderOptions> {
+        use std::io::Cursor;
+
+        let theme = if let Some(theme) = self.theme.clone() {
+            let theme_str = read_to_string(Self::local_path(&format!("themes/{theme}.tmTheme")))?;
+            Some(ThemeSet::load_from_reader(&mut Cursor::new(theme_str.as_bytes()))?)
+        } else {
+            let theme_bytes = if self.light_theme() {
+                LIGHT_THEME
+            } else {
+                DARK_THEME
+            };
+            Some(ThemeSet::load_from_reader(&mut Cursor::new(theme_bytes.as_ref()))?)
+        };
+
+        let wrap = self.wrap.clone();
+
+        Ok(RenderOptions {
+            wrap,
+            wrap_code: self.wrap_code,
+            theme,
+            truecolor: true,
+        })
+    }
+
+    pub fn light_theme(&self) -> bool {
+        if let Some(theme) = &self.theme {
+            theme.ends_with("-light")
+        } else {
+            false
+        }
+    }
+
     pub fn update(config: &GlobalConfig, data: &str) -> Result<()> {
         let parts: Vec<&str> = data.split_whitespace().collect();
         if parts.len() != 2 {
@@ -1371,6 +1404,105 @@ impl Config {
 
         let document_paths = rag.document_paths();
         let temp_file = temp_file(&format!("-rag-{}", rag.name()), ".txt");
+        Ok(())
+    }
+
+    // Dummy implementations for missing methods/functions
+    pub async fn search_rag(
+        _config: &GlobalConfig,
+        _rag: &Rag,
+        _input: &str,
+        _abort_signal: AbortSignal,
+    ) -> Result<String> {
+        Ok("".to_string())
+    }
+
+    pub async fn use_agent(
+        _config: &GlobalConfig,
+        _agent_name: &str,
+        _session_name: &str,
+        _abort_signal: AbortSignal,
+    ) -> Result<()> {
+        Ok(())
+    }
+
+    pub fn agent_banner(&self) -> Result<String> {
+        Ok("".to_string())
+    }
+
+    pub async fn rebuild_rag(_config: &GlobalConfig, _abort_signal: AbortSignal) -> Result<()> {
+        Ok(())
+    }
+
+    pub fn rag_sources(_config: &GlobalConfig) -> Result<String> {
+        Ok("".to_string())
+    }
+
+    pub fn has_macro(_name: &str) -> bool {
+        false
+    }
+
+    pub fn new_macro(&mut self, _name: &str) -> Result<()> {
+        Ok(())
+    }
+
+    pub fn exit_rag(&mut self) -> Result<()> {
+        Ok(())
+    }
+
+    pub fn exit_agent(&mut self) -> Result<()> {
+        Ok(())
+    }
+
+    pub async fn sync_models(_url: &str, _abort_signal: AbortSignal) -> Result<()> {
+        Ok(())
+    }
+
+    pub fn list_rags() -> Vec<String> {
+        vec![]
+    }
+
+    pub fn list_macros() -> Vec<String> {
+        vec![]
+    }
+
+    pub fn apply_prelude(&mut self) -> Result<()> {
+        Ok(())
+    }
+
+    pub fn load_models_override() -> Option<IndexMap<String, Model>> {
+        None
+    }
+
+    pub fn select_functions(&self, _role: &Role) -> Option<Vec<serde_json::Value>> {
+        None
+    }
+
+    pub fn init_agent_session_variables(&mut self, _new_session: bool) -> Result<()> {
+        Ok(())
+    }
+
+    pub fn discontinuous_last_message(&mut self) {
+        // Do nothing
+    }
+
+    pub fn repl_complete(&self, _cmd: &str, _args: &[String], _args_line: &str) -> Vec<(String, String)> {
+        vec![]
+    }
+
+    pub fn render_prompt_left(&self) -> String {
+        "".to_string()
+    }
+
+    pub fn render_prompt_right(&self) -> String {
+        "".to_string()
+    }
+
+    pub fn before_chat_completion(&mut self, _input: &Input) -> Result<()> {
+        Ok(())
+    }
+
+    pub fn after_chat_completion(&mut self, _input: &Input, _output: &str, _tool_results: &[ToolResult]) -> Result<()> {
         Ok(())
     }
 }

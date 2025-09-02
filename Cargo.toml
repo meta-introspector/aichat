@@ -1,6 +1,6 @@
 [workspace]
 members = [
-    ".",
+    ".", "clients/aichat-oauth-client",
 ]
 
 [package]
@@ -74,9 +74,10 @@ fuzzy-matcher = "0.3.7"
 terminal-colorsaurus = "0.4.8"
 duct = "1.0.0"
 oauth2 = { version = "5.0.0", features = ["reqwest"], default-features = false }
+aichat-oauth-client = { path = "clients/aichat-oauth-client" }
 open = "5.0"
 url = "2.x" # Added for URL parsing
-gcloud-sdk = { path = "vendor/gcloud-sdk-rs/gcloud-sdk" } # Vendorized gcloud-sdk-rs
+gcloud-sdk = { path = "vendor/google-apis/gcloud-sdk-rs/gcloud-sdk" } # Vendorized gcloud-sdk-rs
 
 [dependencies.reqwest]
 version = "0.12.12"

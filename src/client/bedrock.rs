@@ -1,6 +1,7 @@
 use super::*;
 
 use crate::utils::{base64_decode, encode_uri, hex_encode, hmac_sha256, sha256, strip_think_tag};
+use crate::client::FunctionInfo;
 
 use anyhow::{bail, Context, Result};
 use aws_smithy_eventstream::frame::{DecodedFrame, MessageFrameDecoder};
@@ -460,12 +461,13 @@ fn build_chat_completions_body(data: ChatCompletionsData, model: &Model) -> Resu
         let tools: Vec<_> = functions
             .iter()
             .map(|v| {
+                let function_info: FunctionInfo = serde_json::from_value(v.clone()).unwrap_or_default(); // Deserialize to FunctionInfo
                 json!({
                     "toolSpec": {
-                        "name": v.name,
-                        "description": v.description,
+                        "name": function_info.name,
+                        "description": function_info.description,
                         "inputSchema": {
-                            "json": v.parameters,
+                            "json": function_info.parameters,
                         },
                     }
                 })

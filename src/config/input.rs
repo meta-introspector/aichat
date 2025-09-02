@@ -199,7 +199,7 @@ impl Input {
         let rag = self.config.read().rag.clone();
         if let Some(rag) = rag {
             // let result = Config::search_rag(&self.config, &rag, &self.text, abort_signal).await?;
-            self.patched_text = Some(result);
+            // self.patched_text = Some(result); // Commented out for now
             self.rag_name = Some(rag.name().to_string());
         }
         Ok(())

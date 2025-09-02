@@ -1,6 +1,7 @@
 use super::*;
 
 use crate::utils::strip_think_tag;
+use crate::client::FunctionInfo;
 
 use anyhow::{bail, Context, Result};
 use reqwest::RequestBuilder;
@@ -269,10 +270,11 @@ pub fn claude_build_chat_completions_body(
         body["tools"] = functions
             .iter()
             .map(|v| {
+                let function_info: FunctionInfo = serde_json::from_value(v.clone()).unwrap_or_default(); // Deserialize to FunctionInfo
                 json!({
-                    "name": v.name,
-                    "description": v.description,
-                    "input_schema": v.parameters,
+                    "name": function_info.name,
+                    "description": function_info.description,
+                    "input_schema": function_info.parameters,
                 })
             })
             .collect();

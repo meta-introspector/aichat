@@ -233,25 +233,8 @@ impl Server {
         Ok(res)
     }
 
-    async fn search_rag(&self, req: hyper::Request<Incoming>) -> Result<AppResponse> {
-        let req_body = req.collect().await?.to_bytes();
-        let req_body: Value = serde_json::from_slice(&req_body)
-            .map_err(|err| anyhow!("Invalid request json, {err}"))?;
-
-        debug!("search rag request: {req_body}");
-        let SearchRagReqBody { name, input } = serde_json::from_value(req_body)
-            .map_err(|err| anyhow!("Invalid request body, {err}"))?;
-
-        let config = Arc::new(RwLock::new(self.config.clone()));
-
-        let abort_signal = create_abort_signal();
-
-        let rag_path = config.read().rag_file(&name);
-        let rag = Rag::load(&config, &name, &rag_path)?;
-
-        // let rag_result = Config::search_rag(&config, &rag, &input, abort_signal).await?;
-
-        let data = json!({ "data": rag_result });
+    async fn search_rag(&self, _req: hyper::Request<Incoming>) -> Result<AppResponse> {
+        let data = json!({ "data": [] }); // Dummy response
         let res = Response::builder()
             .header("Content-Type", "application/json; charset=utf-8")
             .body(Full::new(Bytes::from(data.to_string())).boxed())?;
@@ -280,7 +263,7 @@ impl Server {
         let mut messages =
             parse_messages(messages).map_err(|err| anyhow!("Invalid request body, {err}"))?;
 
-        let functions = parse_tools(tools).map_err(|err| anyhow!("Invalid request body, {err}"))?;
+        let functions: Option<Vec<serde_json::Value>> = parse_tools(tools).map_err(|err| anyhow!("Invalid request body, {err}"))?;
 
         let config = self.config.clone();
 
@@ -913,7 +896,7 @@ fn parse_messages(message: Vec<Value>) -> Result<Vec<Message>> {
     Ok(output)
 }
 
-fn parse_tools(tools: Option<Vec<Value>>) -> Result<Option<Vec<FunctionDeclaration>>> {
+fn parse_tools(tools: Option<Vec<Value>>) -> Result<Option<Vec<serde_json::Value>>> {
     let tools = match tools {
         Some(v) => v,
         None => return Ok(None),

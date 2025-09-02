@@ -23,7 +23,7 @@ pub async fn run(config: GlobalConfig, cli: Cli, text: Option<String>) -> Result
 
     if cli.sync_models {
         let url = config.read().sync_models_url.clone();
-        return Config::sync_models(&url, abort_signal.clone()).await;
+        return Config::sync_models(url.as_deref().unwrap_or_default(), abort_signal.clone()).await;
     }
 
     if cli.list_models {
@@ -71,7 +71,7 @@ pub async fn run(config: GlobalConfig, cli: Cli, text: Option<String>) -> Result
             );
         }
 
-        let ret = Config::use_agent(&config, agent, session, abort_signal.clone()).await;
+        let ret = Config::use_agent(&config, agent, session.unwrap_or_default(), abort_signal.clone()).await;
         config.write().agent_variables = None;
         ret?;
     } else {

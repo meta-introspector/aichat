@@ -5,7 +5,7 @@
 	path = oauth_review/rs-gapi-oauth
 	url = https://github.com/mass10/rs-gapi-oauth
 [submodule "vendor/gcloud-sdk-rs"]
-	path = vendor/gcloud-sdk-rs
+	path = vendor/google-apis/gcloud-sdk-rs
 	url = https://github.com/abdolence/gcloud-sdk-rs
 [submodule "vendor/google-apis/google-cloud-rust"]
 	path = vendor/google-apis/google-cloud-rust

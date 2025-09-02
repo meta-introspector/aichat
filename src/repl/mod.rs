@@ -466,7 +466,7 @@ pub async fn run_repl_command(
                         config.write().agent_variables = Some(variables);
                     }
                     let ret =
-                        Config::use_agent(config, agent_name, session_name, abort_signal.clone())
+                        Config::use_agent(config, agent_name, session_name.unwrap_or_default(), abort_signal.clone())
                             .await;
                     config.write().agent_variables = None;
                     ret?;

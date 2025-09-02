@@ -43,6 +43,7 @@ name = "aichat"
 version = "0.30.0"
 dependencies = [
  "aichat",
+ "aichat-oauth-client",
  "ansi_colours",
  "anyhow",
  "arboard",
@@ -112,6 +113,14 @@ dependencies = [
  "urlencoding",
  "uuid",
  "which 8.0.0",
+]
+
+[[package]]
+name = "aichat-oauth-client"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "oauth2",
 ]
 
 [[package]]

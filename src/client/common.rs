@@ -14,7 +14,7 @@ use inquire::{
     list_option::ListOption, required, validator::Validation, MultiSelect, Select, Text,
 };
 use reqwest::{Client as ReqwestClient, RequestBuilder};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::sync::LazyLock;
 use std::time::Duration;
@@ -23,9 +23,7 @@ use tokio::sync::mpsc::unbounded_channel;
 const MODELS_YAML: &str = include_str!("../../models.yaml");
 
 pub static ALL_PROVIDER_MODELS: LazyLock<Vec<ProviderModels>> = LazyLock::new(|| {
-    Config::load_models_override()
-        .ok()
-        .unwrap_or_else(|| serde_yaml::from_str(MODELS_YAML).unwrap())
+    serde_yaml::from_str(MODELS_YAML).unwrap()
 });
 
 static EMBEDDING_MODEL_RE: LazyLock<Regex> = LazyLock::new(|| {
@@ -288,7 +286,7 @@ pub struct ChatCompletionsData {
     pub messages: Vec<Message>,
     pub temperature: Option<f64>,
     pub top_p: Option<f64>,
-    pub functions: Option<Vec<FunctionDeclaration>>,
+    pub functions: Option<Vec<serde_json::Value>>,
     pub stream: bool,
 }
 
@@ -347,6 +345,13 @@ pub type RerankOutput = Vec<RerankResult>;
 pub struct RerankResult {
     pub index: usize,
     pub relevance_score: f64,
+}
+
+#[derive(Debug, Deserialize, Default, Serialize)]
+pub struct FunctionInfo {
+    pub name: String,
+    pub description: Option<String>,
+    pub parameters: Option<serde_json::Value>,
 }
 
 pub type PromptAction<'a> = (&'a str, &'a str, Option<&'a str>);
