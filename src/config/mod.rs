@@ -37,7 +37,7 @@ use std::{
         remove_dir_all,
         remove_file,
     },
-    io::Write,
+    
     path::{Path, PathBuf},
     sync::{Arc, OnceLock},
 };
@@ -546,7 +546,7 @@ impl Config {
             .wrap
             .clone()
             .map_or_else(|| String::from("no"), |v| v.to_string());
-        let (rag_reranker_model, rag_top_k) = match &self.rag {
+        let (_rag_reranker_model, rag_top_k) = match &self.rag {
             Some(rag) => rag.get_config(),
             None => (self.rag_reranker_model.clone(), self.rag_top_k),
         };
@@ -1390,16 +1390,7 @@ impl Config {
         Ok(())
     }
 
-    pub async fn edit_rag_docs(config: &GlobalConfig, abort_signal: AbortSignal) -> Result<()> {
-        let rag = match config.read().rag.clone() {
-            Some(v) => v.as_ref().clone(),
-            None => bail!("No RAG"),
-        };
-
-        let document_paths = rag.document_paths();
-        let temp_file = temp_file(&format!("-rag-{}", rag.name()), ".txt");
-        Ok(())
-    }
+        
 
     // Dummy implementations for missing methods/functions
     pub async fn search_rag(

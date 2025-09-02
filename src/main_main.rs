@@ -40,7 +40,7 @@ pub async fn main() -> Result<()> {
         return Ok(());
     }
 
-    if let Err(err) = crate::main_run::run(config, cli, text).await {
+    if let Err(err) = crate::main_run::run(crate::main_run::RunArgs { config, cli, text }).await {
         render_error(err);
         std::process::exit(1);
     }

@@ -192,7 +192,7 @@ impl Input {
         self.tool_calls = None;
     }
 
-    pub async fn use_embeddings(&mut self, abort_signal: AbortSignal) -> Result<()> {
+    pub async fn use_embeddings(&mut self, _abort_signal: AbortSignal) -> Result<()> {
         if self.text.is_empty() {
             return Ok(());
         }

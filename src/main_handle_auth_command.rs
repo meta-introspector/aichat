@@ -17,6 +17,7 @@ pub async fn handle_auth_command(command: cli::AuthSubcommands, config: GlobalCo
                 client_id,
                 client_secret,
                 redirect_uri: Some(config.read().oauth.redirect_uri.clone().unwrap_or_else(|| "http://localhost:37387/".to_string())),
+                scopes: None,
             };
             let credential_store = Arc::new(CredentialStore::new()?);
             let oauth_authenticator = OAuthAuthenticator::new(oauth_config, credential_store);
@@ -36,6 +37,7 @@ pub async fn handle_auth_command(command: cli::AuthSubcommands, config: GlobalCo
                 client_id,
                 client_secret,
                 redirect_uri: Some(config.read().oauth.redirect_uri.clone().unwrap_or_else(|| "http://localhost:37387/".to_string())),
+                scopes: None,
             };
             let credential_store = Arc::new(CredentialStore::new()?);
             let oauth_authenticator = OAuthAuthenticator::new(oauth_config, credential_store);
@@ -46,12 +48,14 @@ pub async fn handle_auth_command(command: cli::AuthSubcommands, config: GlobalCo
             }
         }
         cli::AuthSubcommands::GeminiLogin => {
-            let (client_id, client_secret) =
-                crate::auth::oauth_split::constants::load_gemini_oauth_config(&config.read())?;
+            let oauth_config = crate::auth::oauth_split::constants::load_gemini_oauth_config(&config.read())?;
+            let client_id = oauth_config.client_id.clone();
+            let client_secret = oauth_config.client_secret.clone();
             let oauth_config = OAuthConfig {
                 client_id,
                 client_secret,
                 redirect_uri: Some(config.read().oauth.redirect_uri.clone().unwrap_or_else(|| "http://localhost:37387/".to_string())),
+                scopes: None,
             };
             let credential_store = Arc::new(CredentialStore::new()?);
             let oauth_authenticator = OAuthAuthenticator::new(oauth_config, credential_store);

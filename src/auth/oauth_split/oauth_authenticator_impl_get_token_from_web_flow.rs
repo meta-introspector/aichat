@@ -4,7 +4,6 @@ use std::borrow::Cow;
 use oauth2::{AuthUrl, ClientId, ClientSecret, CsrfToken, RedirectUrl, Scope, TokenUrl};
 
 use crate::auth::credential_store::{Credentials};
-use crate::auth::oauth_split::constants::{OAUTH_SCOPE};
 use crate::auth::oauth_split::oauth_config::OAuthConfig;
 use crate::auth::oauth_split::oauth_authenticator_struct::OAuthAuthenticator;
 use crate::auth::oauth_split::find_available_port::find_available_port;
@@ -27,7 +26,7 @@ impl OAuthAuthenticator {
 
         let (authorize_url, csrf_state) = client
             .authorize_url(CsrfToken::new_random)
-            .add_scopes(OAUTH_SCOPE.iter().map(|s| Scope::new(s.to_string())))
+            .add_scopes(self.config.scopes.iter().map(|s| Scope::new(s.to_string())))
             .set_pkce_challenge(pkce_code_challenge)
             .set_redirect_uri(Cow::Owned(RedirectUrl::new(redirect_uri.clone()).unwrap()))
             .url();

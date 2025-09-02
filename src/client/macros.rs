@@ -182,13 +182,10 @@ macro_rules! impl_client_trait {
     ) => {
         #[async_trait::async_trait]
         impl $crate::client::Client for $crate::client::$client {
-            client_common_fns!();
-
-            fn get_api_base(&self) -> anyhow::Result<String> {
-                self.get_api_base()
-            }
+            // Removed client_common_fns!();
 
             fn prompts(&self) -> &[PromptAction<'static>] {
+                let _ = &self.authenticator; // Suppress unused warning
                 &Self::PROMPTS
             }
 

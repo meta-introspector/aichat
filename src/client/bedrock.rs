@@ -144,10 +144,7 @@ impl BedrockClient {
 impl Client for BedrockClient {
     client_common_fns!();
 
-    fn get_api_base(&self) -> Result<String> {
-        let region = self.get_region()?;
-        Ok(format!("https://bedrock-runtime.{region}.amazonaws.com"))
-    }
+    
 
     async fn chat_completions_inner(
         &self,

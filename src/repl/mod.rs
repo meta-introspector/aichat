@@ -527,7 +527,7 @@ pub async fn run_repl_command(
                         config.write().edit_session()?;
                     }
                     Some("rag-docs") => {
-                        Config::edit_rag_docs(config, abort_signal.clone()).await?;
+                        
                     }
                     Some("agent-config") => {
                         config.write().edit_config()?;

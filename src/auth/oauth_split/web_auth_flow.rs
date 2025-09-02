@@ -7,7 +7,7 @@ use open;
 
 pub async fn run_web_auth_flow(
     authorize_url: Url,
-    csrf_state: CsrfToken,
+    _csrf_state: CsrfToken,
     port: u16,
 ) -> Result<(AuthorizationCode, CsrfToken)> {
     let mut redacted_authorize_url = authorize_url.clone();

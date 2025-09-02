@@ -1,36 +1,28 @@
-use anyhow::{Result, Context};
-use std::io::{BufReader, Write, BufRead};
+use anyhow::{Context, Result};
 use std::net::TcpListener;
-use oauth2::url::Url;
+use url::Url;
+use std::io::{Read, Write};
 
 pub async fn run_web_flow_listener(port: u16) -> Result<Url> {
-    println!("Attempting to bind TcpListener to 127.0.0.1:{}", port);
-    let listener = TcpListener::bind(format!("127.0.0.1:{}", port))?;
-    println!("TcpListener bound successfully.");
+    let listener = TcpListener::bind(format!("127.0.0.1:{}", port))
+        .with_context(|| format!("Failed to bind to port {}", port))?;
 
-    loop {
-        println!("Waiting for incoming connection...");
-        let mut stream = listener.incoming().flatten().next().context("Listener terminated without accepting a connection")?;
-        println!("Incoming connection received.");
+    println!("Waiting for incoming connection...");
+    let mut stream = listener.incoming().flatten().next().context("Listener terminated without accepting a connection")?;
+    println!("Incoming connection received.");
 
-        let mut reader = BufReader::new(&stream);
-        let mut request_line = String::new();
-        reader.read_line(&mut request_line)?;
-        println!("Request line: {}", request_line);
+    let mut buffer = [0; 1024];
+    let bytes_read = stream.read(&mut buffer).context("Failed to read from stream")?;
+    let request = String::from_utf8_lossy(&buffer[..bytes_read]);
 
-        let redirect_url_path = request_line.split_whitespace().nth(1).context("Invalid redirect URL")?;
-        let url = Url::parse(&format!("http://localhost:{}{}", port, redirect_url_path))?;
-        println!("Parsed URL: {}", url);
+    let response = "HTTP/1.1 200 OK\r\nContent-Length: 12\r\n\r\nAuth success";
+    stream.write_all(response.as_bytes()).context("Failed to write response")?;
 
-        // Send a response to the browser
-        let message = "Please return to the application.";
-        let response = format!(
-            "HTTP/1.1 200 OK\r\ncontent-length: {}\r\n\r\n{}",
-            message.len(),
-            message
-        );
-        stream.write_all(response.as_bytes())?;
+    let query_string = request.lines().next().and_then(|line| {
+        line.split(' ').nth(1).and_then(|path| {
+            Url::parse(&format!("http://localhost{}", path)).ok()
+        })
+    }).context("Failed to parse URL from request")?;
 
-        return Ok(url);
-    }
+    Ok(query_string)
 }

@@ -16,6 +16,7 @@ use std::sync::LazyLock;
 
 pub static SHELL: LazyLock<Shell> = LazyLock::new(detect_shell);
 
+#[derive(Clone)]
 pub struct Shell {
     pub name: String,
     pub cmd: String,

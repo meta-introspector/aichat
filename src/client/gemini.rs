@@ -36,28 +36,15 @@ impl GeminiClient {
     pub fn new(model: Model, config: GeminiConfig, authenticator: Box<dyn Authenticator + Send + Sync>) -> Self {
         Self { model, config, authenticator }
     }
-
-    pub fn get_api_base(&self) -> anyhow::Result<String> {
-        let env_prefix = Self::name(&self.config);
-        let env_name =
-            format!("{}_{}", env_prefix, stringify!(api_base)).to_ascii_uppercase();
-        std::env::var(&env_name)
-            .ok()
-            .or_else(|| self.config.api_base.clone())
-            .ok_or_else(|| anyhow::anyhow!("Miss '{}'", stringify!(api_base)))
-    }
-
-    
 }
-
 
 pub async fn prepare_chat_completions(
     self_: &crate::client::GeminiClient,
     data: ChatCompletionsData,
 ) -> Result<RequestData> {
     let api_key = self_.authenticator.as_ref().context("Authenticator not found")?.authenticate().await?;
-    let api_base = self_.get_api_base()
-        .unwrap_or_else(|_| API_BASE.to_string());
+    let api_base = self_.config.api_base.clone()
+        .unwrap_or_else(|| API_BASE.to_string());
 
     let func = match data.stream {
         true => "streamGenerateContent",
@@ -85,8 +72,8 @@ pub async fn prepare_embeddings(
     data: &EmbeddingsData,
 ) -> Result<RequestData> {
     let api_key = self_.authenticator.as_ref().context("Authenticator not found")?.authenticate().await?;
-    let api_base = self_.get_api_base()
-        .unwrap_or_else(|_| API_BASE.to_string());
+    let api_base = self_.config.api_base.clone()
+        .unwrap_or_else(|| API_BASE.to_string());
 
     let url = format!(
         "{}/models/{}:batchEmbedContents",
