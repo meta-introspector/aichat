@@ -42,6 +42,7 @@ impl Authenticator for OAuthAuthenticator {
             oauth_client_setup::setup_oauth_client(
                 self.config.client_id.clone(),
                 self.config.client_secret.clone(),
+                self.config.scopes.clone(), // Pass scopes from config
             )?;
 
         let redirect_uri_from_config = self.config.redirect_uri.clone().unwrap_or_else(|| "http://localhost:37387/".to_string());
@@ -50,7 +51,7 @@ impl Authenticator for OAuthAuthenticator {
 
         let (authorize_url, csrf_state) = client
             .authorize_url(CsrfToken::new_random)
-            .add_scopes(OAUTH_SCOPE.iter().map(|s| Scope::new(s.to_string())))
+            // .add_scopes(OAUTH_SCOPE.iter().map(|s| Scope::new(s.to_string()))) // Remove redundant call
             .set_pkce_challenge(pkce_code_challenge)
             .set_redirect_uri(Cow::Owned(RedirectUrl::new(redirect_uri.clone()).unwrap()))
             .url();

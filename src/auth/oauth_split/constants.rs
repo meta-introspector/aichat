@@ -12,11 +12,7 @@ pub type GoogleOAuthClient = BasicClient<
     EndpointSet, // HasTokenUrl
 >;
 
-pub const OAUTH_SCOPE: &[&str] = &[
-    "https://www.googleapis.com/auth/cloud-platform",
-    "https://www.googleapis.com/auth/userinfo.email",
-    "https://www.googleapis.com/auth/userinfo.profile",
-];
+
 
 pub fn load_oauth_config(config: &crate::config::Config) -> Result<(String, String)> {
     let redirect_uri = config.oauth.redirect_uri.clone().unwrap_or_else(|| "http://localhost:37387/".to_string());
@@ -42,7 +38,7 @@ pub fn get_oauth_redirect_uri(config: &crate::config::Config) -> String {
     config.oauth.redirect_uri.clone().unwrap_or_else(|| "http://localhost:37387/".to_string())
 }
 
-pub fn load_gemini_oauth_config(config: &crate::config::Config) -> Result<(String, String)> {
+pub fn load_gemini_oauth_config(config: &crate::config::Config) -> Result<crate::auth::oauth_split::oauth_config::OAuthConfig> {
     let path = crate::config::Config::config_dir().join("clients").join("gemini").join("client_secret.json");
     let content = fs::read_to_string(path)
         .map_err(|e| anyhow!("Failed to read Gemini client secret file: {}", e))?;
@@ -57,6 +53,14 @@ pub fn load_gemini_oauth_config(config: &crate::config::Config) -> Result<(Strin
         .as_str()
         .ok_or_else(|| anyhow!("client_secret not found in Gemini JSON"))?
         .to_string();
+    let scopes = json["web"]["scopes"]
+        .as_array()
+        .map(|arr| arr.iter().filter_map(|v| v.as_str().map(|s| s.to_string())).collect());
 
-    Ok((client_id, client_secret))
+    Ok(crate::auth::oauth_split::oauth_config::OAuthConfig {
+        client_id,
+        client_secret,
+        redirect_uri: Some(config.oauth.redirect_uri.clone().unwrap_or_else(|| "http://localhost:37387/".to_string())),
+        scopes,
+    })
 }
