@@ -22,3 +22,6 @@
 [submodule "vendor/google-apis/tlns-google-oauth2"]
 	path = vendor/google-apis/tlns-google-oauth2
 	url = https://github.com/timelessnesses/tlns-google-oauth2
+[submodule "vendor/casbin-rs"]
+	path = vendor/casbin-rs
+	url = https://github.com/casbin/casbin-rs
