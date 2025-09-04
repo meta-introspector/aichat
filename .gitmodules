@@ -3,7 +3,7 @@
 	url = https://github.com/mass10/r-google-oauth2/
 [submodule "oauth_review/rs-gapi-oauth"]
 	path = oauth_review/rs-gapi-oauth
-	url = https://github.com/mass10/rs-gapi-oauth
+	url = https://github.com/meta-introspector/mass10-rs-gapi-oauth-archive
 [submodule "vendor/gcloud-sdk-rs"]
 	path = vendor/google-apis/gcloud-sdk-rs
 	url = https://github.com/abdolence/gcloud-sdk-rs
