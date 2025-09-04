@@ -25,3 +25,6 @@
 [submodule "vendor/casbin-rs"]
 	path = vendor/casbin-rs
 	url = https://github.com/casbin/casbin-rs
+[submodule "vendor/fastly-compute-rust-auth"]
+	path = vendor/fastly-compute-rust-auth
+	url = https://github.com/meta-introspector/compute-rust-auth
