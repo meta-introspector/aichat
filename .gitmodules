@@ -1,3 +1,6 @@
 [submodule "oauth_review/r-google-oauth2"]
 	path = oauth_review/r-google-oauth2
 	url = https://github.com/mass10/r-google-oauth2/
+[submodule "oauth_review/rs-gapi-oauth"]
+	path = oauth_review/rs-gapi-oauth
+	url = https://github.com/meta-introspector/rs-gapi-oauth
